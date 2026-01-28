@@ -1,17 +1,19 @@
-# 🦸 HabitHero
+# ⚔️ QuestHabit
 
-> Level up your life, one habit at a time
+> Turn habits into quests. Level up your life.
 
 A gamified habit tracking app with AI coaching built with React Native (Expo) and Supabase.
 
-![HabitHero Banner](https://img.shields.io/badge/Status-In%20Development-yellow)
+![QuestHabit Banner](https://img.shields.io/badge/Status-In%20Development-yellow)
 ![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
+
+**Website:** [questhabit.com](https://questhabit.com) *(coming soon)*
 
 ## ✨ Features
 
 ### Core Features
-- 📋 **Habit Management** - Create, edit, and track daily habits
+- 📋 **Quest Management** - Create, edit, and track daily habits as quests
 - 🎮 **Gamification** - Earn XP, level up, and maintain streaks
 - 🔥 **Streak Tracking** - Build momentum with consecutive day tracking
 - 🏆 **Achievements** - Unlock badges for milestones
@@ -19,7 +21,7 @@ A gamified habit tracking app with AI coaching built with React Native (Expo) an
 
 ### Premium Features (Pro)
 - 🤖 **AI Coach** - Personalized insights and motivation
-- ♾️ **Unlimited Habits** - No limits on habit creation
+- ♾️ **Unlimited Quests** - No limits on habit creation
 - 🧊 **Streak Freeze** - Protect your streaks
 - 🎨 **Custom Themes** - Personalize your experience
 
@@ -44,8 +46,8 @@ A gamified habit tracking app with AI coaching built with React Native (Expo) an
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/garydbutler/habithero.git
-   cd habithero
+   git clone https://github.com/garydbutler/questhabit.git
+   cd questhabit
    ```
 
 2. **Install dependencies**
@@ -77,7 +79,7 @@ A gamified habit tracking app with AI coaching built with React Native (Expo) an
 ## 📁 Project Structure
 
 ```
-habithero/
+questhabit/
 ├── app/                    # Expo app
 │   ├── src/
 │   │   ├── app/           # Expo Router screens
@@ -101,14 +103,14 @@ habithero/
 
 ## 🗺️ Roadmap
 
-- [x] Core habit management
+- [x] Core quest/habit management
 - [x] XP & leveling system
 - [x] Streak tracking
 - [x] Basic stats
 - [ ] Calendar heatmap
 - [ ] AI coach integration
 - [ ] Push notifications
-- [ ] Social features
+- [ ] Social features (guilds, challenges)
 - [ ] Apple Watch / Wear OS
 
 ## 🤝 Contributing

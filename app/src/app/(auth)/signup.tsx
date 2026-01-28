@@ -53,7 +53,7 @@ export default function SignUpScreen() {
         {/* Logo */}
         <View style={styles.header}>
           <Text style={styles.logo}>🦸</Text>
-          <Text style={styles.title}>Join HabitHero</Text>
+          <Text style={styles.title}>Join QuestHabit</Text>
           <Text style={styles.subtitle}>Start your journey to better habits</Text>
         </View>
 

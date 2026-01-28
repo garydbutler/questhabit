@@ -37,7 +37,7 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <View style={styles.authContainer}>
-        <Text style={styles.authTitle}>Join HabitHero</Text>
+        <Text style={styles.authTitle}>Join QuestHabit</Text>
         <Text style={styles.authSubtitle}>
           Sign in to sync your habits and track your progress
         </Text>
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
               </Text>
               <Text style={styles.proSubtitle}>
                 {user.isPro
-                  ? 'Thank you for supporting HabitHero!'
+                  ? 'Thank you for supporting QuestHabit!'
                   : 'Unlimited habits, AI coach, and more'}
               </Text>
             </View>
@@ -131,7 +131,7 @@ export default function ProfileScreen() {
         <Card>
           <SettingsItem icon="❓" title="Help & FAQ" />
           <SettingsItem icon="💬" title="Send Feedback" />
-          <SettingsItem icon="⭐" title="Rate HabitHero" isLast />
+          <SettingsItem icon="⭐" title="Rate QuestHabit" isLast />
         </Card>
       </View>
 
@@ -146,7 +146,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* Version */}
-      <Text style={styles.version}>HabitHero v1.0.0</Text>
+      <Text style={styles.version}>QuestHabit v1.0.0</Text>
     </ScrollView>
   );
 }

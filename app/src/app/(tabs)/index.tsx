@@ -56,7 +56,7 @@ export default function HomeScreen() {
   if (!user) {
     return (
       <View style={styles.authPrompt}>
-        <Text style={styles.authTitle}>Welcome to HabitHero! 🦸</Text>
+        <Text style={styles.authTitle}>Welcome to QuestHabit! ⚔️</Text>
         <Text style={styles.authSubtitle}>
           Sign in to start building habits
         </Text>
