@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "HabitHero",
-    "slug": "habithero",
+    "name": "questhabit",
+    "slug": "questhabit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "habithero",
+    "scheme": "questhabit",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.habithero.app"
+      "bundleIdentifier": "com.questhabit.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F0F0F"
       },
-      "package": "com.habithero.app"
+      "package": "com.questhabit.app"
     },
     "web": {
       "bundler": "metro",
@@ -37,3 +37,4 @@
     }
   }
 }
+

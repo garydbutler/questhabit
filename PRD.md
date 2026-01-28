@@ -1,4 +1,4 @@
-# HabitHero - Product Requirements Document
+# QuestHabit - Product Requirements Document
 
 **Version:** 1.0  
 **Last Updated:** January 28, 2026  
@@ -9,9 +9,9 @@
 
 ## Executive Summary
 
-**HabitHero** is a mobile-first habit tracking application that transforms daily routines into an engaging RPG-style adventure. By combining proven habit-building psychology with gamification mechanics, HabitHero helps users build lasting habits through XP rewards, leveling systems, streaks, and AI-powered coaching.
+**QuestHabit** is a mobile-first habit tracking application that transforms daily routines into an engaging RPG-style adventure. By combining proven habit-building psychology with gamification mechanics, QuestHabit helps users build lasting habits through XP rewards, leveling systems, streaks, and AI-powered coaching.
 
-**Tagline:** "Level up your life, one habit at a time"
+**Tagline:** "Turn habits into quests. Level up your life."
 
 ---
 
@@ -31,7 +31,7 @@ The global habit tracking app market is valued at approximately $1.5B (2024) and
 | **Loop Habit Tracker** | Open source, powerful charts, no ads | Android only, no cloud sync, utilitarian design | Free |
 
 ### Competitive Advantage
-HabitHero occupies the sweet spot between:
+QuestHabit occupies the sweet spot between:
 - Habitica's gamification (but with modern, accessible design)
 - Streaks' minimalism (but with more engagement hooks)
 - Fabulous's coaching (but AI-powered and more affordable)
@@ -567,3 +567,4 @@ function getLevel(totalXP) {
 ---
 
 *Document version 1.0 - Initial PRD for MVP development*
+
