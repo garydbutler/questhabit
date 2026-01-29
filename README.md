@@ -1,138 +1,107 @@
-# ⚔️ QuestHabit
+# QuestHabit ⚔️
 
-> Turn habits into quests. Level up your life.
+**Turn habits into quests. Level up your life.**
 
-A gamified habit tracking app with AI coaching built with React Native (Expo) and Supabase.
+A gamified habit tracker that transforms daily routines into an RPG adventure. Earn XP, build streaks, unlock achievements, and get AI-powered coaching.
 
-![QuestHabit Banner](https://img.shields.io/badge/Status-In%20Development-yellow)
-![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+## Features
 
-**Website:** [questhabit.com](https://questhabit.com) *(coming soon)*
+- **Habit Management** — Create, edit, track daily habits with categories and difficulty levels
+- **XP & Leveling** — Earn XP for completing habits, with streak bonuses and morning bonuses
+- **Streaks** — Track current and best streaks for each habit
+- **Achievements** — Unlock badges like First Step, Week Warrior, Monthly Master
+- **AI Coach** — Chat with an AI coach that analyzes your habits and gives personalized advice
+- **Calendar Heatmap** — GitHub-style activity visualization
+- **Onboarding** — Swipeable intro that explains the app's value
+- **Dark Mode** — Beautiful dark theme throughout
+- **Cross-Platform** — iOS, Android, and Web via Expo
 
-## ✨ Features
+## Tech Stack
 
-### Core Features
-- 📋 **Quest Management** - Create, edit, and track daily habits as quests
-- 🎮 **Gamification** - Earn XP, level up, and maintain streaks
-- 🔥 **Streak Tracking** - Build momentum with consecutive day tracking
-- 🏆 **Achievements** - Unlock badges for milestones
-- 📊 **Stats & Analytics** - Visualize your progress
+- **Framework:** React Native + Expo (SDK 54)
+- **Navigation:** Expo Router (file-based routing)
+- **Backend:** Supabase (Auth, Postgres, RLS)
+- **State:** Zustand
+- **Styling:** React Native StyleSheet (dark theme)
+- **Animations:** React Native Reanimated
+- **Haptics:** Expo Haptics
 
-### Premium Features (Pro)
-- 🤖 **AI Coach** - Personalized insights and motivation
-- ♾️ **Unlimited Quests** - No limits on habit creation
-- 🧊 **Streak Freeze** - Protect your streaks
-- 🎨 **Custom Themes** - Personalize your experience
+## Quick Start
 
-## 🛠️ Tech Stack
+### 1. Create Supabase Project
 
-- **Frontend:** React Native with Expo
-- **Navigation:** Expo Router
-- **State Management:** Zustand
-- **Backend:** Supabase (Auth, Database, Edge Functions)
-- **Styling:** StyleSheet + NativeWind
-- **AI:** OpenAI GPT-4o-mini
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Copy your project URL and anon key
 
-## 🚀 Getting Started
+### 2. Run Database Schema
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- A Supabase account
+1. Open Supabase SQL Editor
+2. Paste contents of `supabase/schema.sql`
+3. Run it — this creates all tables, RLS policies, and triggers
 
-### Installation
+### 3. Configure Environment
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/garydbutler/questhabit.git
-   cd questhabit
-   ```
+```bash
+cd app
+cp .env.example .env.local
+```
 
-2. **Install dependencies**
-   ```bash
-   cd app
-   npm install
-   ```
+Edit `.env.local`:
+```
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+```
 
-3. **Set up Supabase**
-   - Create a new Supabase project at [supabase.com](https://supabase.com)
-   - Run the SQL schema from `supabase/schema.sql` in the SQL Editor
-   - Copy your project URL and anon key
+### 4. Install & Run
 
-4. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Supabase credentials
-   ```
+```bash
+cd app
+npm install
+npx expo start
+```
 
-5. **Start the development server**
-   ```bash
-   npm start
-   ```
+Scan QR code with Expo Go (iOS/Android) or press `w` for web.
 
-6. **Run on your device**
-   - Scan the QR code with Expo Go (Android) or Camera app (iOS)
-   - Or press `w` to open in web browser
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-questhabit/
-├── app/                    # Expo app
-│   ├── src/
-│   │   ├── app/           # Expo Router screens
-│   │   ├── components/    # React components
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── stores/        # Zustand stores
-│   │   ├── lib/           # Utilities & API clients
-│   │   ├── types/         # TypeScript types
-│   │   └── constants/     # App constants
-│   ├── assets/            # Images, fonts, etc.
-│   └── package.json
+app/
+├── src/
+│   ├── app/                    # Expo Router pages
+│   │   ├── (auth)/             # Login & Signup
+│   │   ├── (tabs)/             # Main tabs (Today, Coach, Stats, Profile)
+│   │   ├── habit/              # New & Edit habit modals
+│   │   ├── onboarding.tsx      # First-time user experience
+│   │   └── _layout.tsx         # Root layout
+│   ├── components/
+│   │   ├── coaching/           # AI Coach chat interface
+│   │   ├── gamification/       # Level badge, XP popup
+│   │   ├── habits/             # Habit card, daily progress
+│   │   ├── stats/              # Calendar heatmap
+│   │   └── ui/                 # Button, Input, Card, ProgressBar
+│   ├── constants/              # XP values, levels, categories
+│   ├── lib/                    # Supabase client, XP calc, achievements
+│   ├── stores/                 # Zustand stores (auth, habits)
+│   └── types/                  # TypeScript interfaces
 ├── supabase/
-│   └── schema.sql         # Database schema
-├── PRD.md                  # Product Requirements Doc
-└── README.md
+│   └── schema.sql              # Complete database schema
+└── PRD.md                      # Product requirements document
 ```
 
-## 📱 Screenshots
+## Revenue Model
 
-*Coming soon*
+- **Free Tier:** 5 habits, 30-day history
+- **Pro ($4.99/mo):** Unlimited habits, full history, AI coach, advanced stats
 
-## 🗺️ Roadmap
+## Roadmap
 
-- [x] Core quest/habit management
-- [x] XP & leveling system
-- [x] Streak tracking
-- [x] Basic stats
-- [ ] Calendar heatmap
-- [ ] AI coach integration
-- [ ] Push notifications
-- [ ] Social features (guilds, challenges)
-- [ ] Apple Watch / Wear OS
+- [ ] Push notifications for reminders
+- [ ] Social features (friend challenges)
+- [ ] Custom habit categories
+- [ ] Data export (CSV)
+- [ ] Apple Health / Google Fit integration
+- [ ] Widgets (iOS/Android)
 
-## 🤝 Contributing
+## License
 
-Contributions are welcome! Please read our contributing guidelines first.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Expo](https://expo.dev) for the amazing React Native tooling
-- [Supabase](https://supabase.com) for the backend infrastructure
-- [Habitica](https://habitica.com) for gamification inspiration
-
----
-
-**Made with ❤️ by Gary Butler**
+Private — © 2026 Gary Butler

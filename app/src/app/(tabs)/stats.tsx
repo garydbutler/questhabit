@@ -1,18 +1,62 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
+  Alert,
 } from 'react-native';
+import { format, subDays } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 import { useHabitStore } from '../../stores/habitStore';
 import { LevelBadge } from '../../components/gamification/LevelBadge';
+import { CalendarHeatmap } from '../../components/stats/CalendarHeatmap';
 import { Card } from '../../components/ui/Card';
+import { supabase } from '../../lib/supabase';
 
 export default function StatsScreen() {
   const { user } = useAuthStore();
   const { habits } = useHabitStore();
+  const [heatmapData, setHeatmapData] = useState<Array<{ date: string; count: number; total: number }>>([]);
+
+  useEffect(() => {
+    if (user) {
+      loadHeatmapData();
+    }
+  }, [user, habits]);
+
+  const loadHeatmapData = async () => {
+    if (!user) return;
+    
+    try {
+      const startDate = format(subDays(new Date(), 16 * 7), 'yyyy-MM-dd');
+      const { data: completions } = await supabase
+        .from('completions')
+        .select('completed_date')
+        .eq('user_id', user.id)
+        .gte('completed_date', startDate);
+
+      // Count completions per day
+      const countByDate = new Map<string, number>();
+      completions?.forEach((c: any) => {
+        const date = c.completed_date;
+        countByDate.set(date, (countByDate.get(date) || 0) + 1);
+      });
+
+      const activeHabits = habits.filter(h => !h.isArchived);
+      const total = activeHabits.length;
+
+      const data = Array.from(countByDate.entries()).map(([date, count]) => ({
+        date,
+        count,
+        total: total || 1,
+      }));
+
+      setHeatmapData(data);
+    } catch (error) {
+      console.error('Failed to load heatmap data:', error);
+    }
+  };
 
   if (!user) {
     return (
@@ -36,6 +80,23 @@ export default function StatsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Progress</Text>
         <LevelBadge totalXP={user.totalXp} />
+      </View>
+
+      {/* Calendar Heatmap */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Activity</Text>
+        <CalendarHeatmap
+          data={heatmapData}
+          weeks={16}
+          onDayPress={(date, data) => {
+            if (data) {
+              Alert.alert(
+                format(new Date(date + 'T12:00:00'), 'MMMM d, yyyy'),
+                `${data.count}/${data.total} habits completed`
+              );
+            }
+          }}
+        />
       </View>
 
       {/* Stats Grid */}
@@ -96,19 +157,6 @@ export default function StatsScreen() {
             </Card>
           ))
         )}
-      </View>
-
-      {/* Coming Soon */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Coming Soon</Text>
-        <Card>
-          <View style={styles.comingSoon}>
-            <Text style={styles.comingSoonIcon}>📊</Text>
-            <Text style={styles.comingSoonText}>
-              Calendar heatmap, detailed analytics, and more stats coming in the next update!
-            </Text>
-          </View>
-        </Card>
       </View>
     </ScrollView>
   );

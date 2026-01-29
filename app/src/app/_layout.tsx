@@ -31,19 +31,20 @@ export default function RootLayout() {
           animation: 'slide_from_right',
         }}
       >
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen
           name="habit/new"
           options={{
-            title: 'New Habit',
+            title: 'New Quest',
             presentation: 'modal',
           }}
         />
         <Stack.Screen
           name="habit/[id]"
           options={{
-            title: 'Edit Habit',
+            title: 'Edit Quest',
             presentation: 'modal',
           }}
         />
