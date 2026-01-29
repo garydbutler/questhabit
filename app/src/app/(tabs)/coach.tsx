@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { AICoach } from '../../components/coaching/AICoach';
+import { Colors } from '../../constants/design';
 
 export default function CoachScreen() {
   return (
@@ -13,6 +14,6 @@ export default function CoachScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
 });

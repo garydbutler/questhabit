@@ -10,8 +10,12 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useHabitStore } from '../../stores/habitStore';
 import { Input } from '../../components/ui/Input';
+import { GradientButton } from '../../components/ui/GradientButton';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { GradientCard } from '../../components/ui/GradientCard';
+import { SectionHeader } from '../../components/ui/SectionHeader';
+import { ChipTag } from '../../components/ui/ChipTag';
 import {
   HabitCategory,
   HabitDifficulty,
@@ -22,9 +26,10 @@ import {
   CATEGORY_COLORS,
   DIFFICULTY_LABELS,
   XP_VALUES,
-  HABIT_EMOJIS,
+  HABIT_ICONS,
   HABIT_COLORS,
 } from '../../constants';
+import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/design';
 
 export default function EditHabitScreen() {
   const router = useRouter();
@@ -38,8 +43,8 @@ export default function EditHabitScreen() {
   const [category, setCategory] = useState<HabitCategory>('custom');
   const [frequency, setFrequency] = useState<FrequencyType>('daily');
   const [difficulty, setDifficulty] = useState<HabitDifficulty>('medium');
-  const [icon, setIcon] = useState('⭐');
-  const [color, setColor] = useState('#6366F1');
+  const [icon, setIcon] = useState('\u2726');
+  const [color, setColor] = useState('#06B6D4');
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
@@ -112,18 +117,29 @@ export default function EditHabitScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Streak Info */}
-      <Card style={styles.streakCard}>
+      <GradientCard variant="accent" style={styles.streakCard}>
         <View style={styles.streakInfo}>
           <View style={styles.streakItem}>
-            <Text style={styles.streakValue}>🔥 {habit.streak?.currentStreak || 0}</Text>
+            <ChipTag
+              label={`${habit.streak?.currentStreak || 0}`}
+              color={Colors.streak.primary}
+              icon={Icons.streak}
+              size="md"
+            />
             <Text style={styles.streakLabel}>Current Streak</Text>
           </View>
+          <View style={styles.streakDivider} />
           <View style={styles.streakItem}>
-            <Text style={styles.streakValue}>⭐ {habit.streak?.bestStreak || 0}</Text>
+            <ChipTag
+              label={`${habit.streak?.bestStreak || 0}`}
+              color={Colors.xp.primary}
+              icon={Icons.trophy}
+              size="md"
+            />
             <Text style={styles.streakLabel}>Best Streak</Text>
           </View>
         </View>
-      </Card>
+      </GradientCard>
 
       {/* Name & Description */}
       <View style={styles.section}>
@@ -146,13 +162,13 @@ export default function EditHabitScreen() {
 
       {/* Icon & Color */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Appearance</Text>
+        <SectionHeader title="Appearance" />
         <View style={styles.row}>
           <TouchableOpacity
-            style={[styles.pickerButton, { backgroundColor: color }]}
+            style={[styles.pickerButton, { backgroundColor: `${color}20` }]}
             onPress={() => setShowIconPicker(!showIconPicker)}
           >
-            <Text style={styles.iconPreview}>{icon}</Text>
+            <Text style={[styles.iconPreview, { color }]}>{icon}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.colorButton, { backgroundColor: color }]}
@@ -164,20 +180,20 @@ export default function EditHabitScreen() {
 
         {showIconPicker && (
           <Card style={styles.picker}>
-            <View style={styles.emojiGrid}>
-              {HABIT_EMOJIS.map((emoji) => (
+            <View style={styles.iconGrid}>
+              {HABIT_ICONS.map((ic) => (
                 <TouchableOpacity
-                  key={emoji}
+                  key={ic}
                   style={[
-                    styles.emojiButton,
-                    icon === emoji && styles.emojiButtonSelected,
+                    styles.iconButtonItem,
+                    icon === ic && { backgroundColor: Colors.accent.muted, borderColor: Colors.accent.primary },
                   ]}
                   onPress={() => {
-                    setIcon(emoji);
+                    setIcon(ic);
                     setShowIconPicker(false);
                   }}
                 >
-                  <Text style={styles.emoji}>{emoji}</Text>
+                  <Text style={[styles.iconSymbol, icon === ic && { color: Colors.accent.primary }]}>{ic}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -208,18 +224,20 @@ export default function EditHabitScreen() {
 
       {/* Category */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Category</Text>
+        <SectionHeader title="Category" />
         <View style={styles.optionsGrid}>
           {(Object.keys(CATEGORY_LABELS) as HabitCategory[]).map((cat) => (
             <TouchableOpacity
               key={cat}
               style={[
                 styles.option,
-                category === cat && { borderColor: CATEGORY_COLORS[cat] },
+                category === cat && { borderColor: CATEGORY_COLORS[cat], backgroundColor: `${CATEGORY_COLORS[cat]}10` },
               ]}
               onPress={() => setCategory(cat)}
             >
-              <Text style={styles.optionText}>{CATEGORY_LABELS[cat]}</Text>
+              <Text style={[styles.optionText, category === cat && { color: CATEGORY_COLORS[cat] }]}>
+                {CATEGORY_LABELS[cat]}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -227,7 +245,7 @@ export default function EditHabitScreen() {
 
       {/* Frequency */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Frequency</Text>
+        <SectionHeader title="Frequency" />
         <View style={styles.optionsGrid}>
           {(['daily', 'weekdays', 'weekends'] as FrequencyType[]).map((freq) => (
             <TouchableOpacity
@@ -253,7 +271,7 @@ export default function EditHabitScreen() {
 
       {/* Difficulty */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Difficulty</Text>
+        <SectionHeader title="Difficulty" />
         <View style={styles.optionsGrid}>
           {(Object.keys(DIFFICULTY_LABELS) as HabitDifficulty[]).map((diff) => (
             <TouchableOpacity
@@ -272,7 +290,9 @@ export default function EditHabitScreen() {
               >
                 {DIFFICULTY_LABELS[diff]}
               </Text>
-              <Text style={styles.xpText}>+{XP_VALUES[diff]} XP</Text>
+              <Text style={styles.xpText}>
+                {Icons.xp} +{XP_VALUES[diff]} XP
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -280,19 +300,17 @@ export default function EditHabitScreen() {
 
       {/* Actions */}
       <View style={styles.actions}>
-        <Button
+        <GradientButton
           title="Save Changes"
           onPress={handleSave}
           loading={isLoading}
           disabled={!name.trim()}
+          fullWidth
+          size="lg"
         />
-        <Button
-          title="Delete Habit"
-          variant="ghost"
-          onPress={handleDelete}
-          textStyle={{ color: '#EF4444' }}
-          style={styles.deleteButton}
-        />
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} activeOpacity={0.7}>
+          <Text style={styles.deleteText}>Delete Habit</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -301,103 +319,103 @@ export default function EditHabitScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   content: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: Spacing.lg,
+    paddingBottom: Spacing['3xl'],
   },
   notFound: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 40,
+    padding: Spacing['3xl'],
   },
   notFoundText: {
-    color: '#A1A1A1',
-    fontSize: 16,
-    marginBottom: 20,
+    color: Colors.text.tertiary,
+    ...Typography.body,
+    marginBottom: Spacing.lg,
   },
   streakCard: {
-    marginBottom: 24,
+    marginBottom: Spacing.xl,
   },
   streakInfo: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   streakItem: {
     alignItems: 'center',
+    gap: Spacing.xs,
   },
-  streakValue: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    marginBottom: 4,
+  streakDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: Colors.border.primary,
   },
   streakLabel: {
-    fontSize: 12,
-    color: '#6B6B6B',
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
   section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    marginBottom: Spacing.xl,
   },
   row: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.sm,
   },
   pickerButton: {
     width: 64,
     height: 64,
-    borderRadius: 16,
+    borderRadius: Radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
   },
   iconPreview: {
-    fontSize: 32,
+    fontSize: 28,
+    fontWeight: '700',
   },
   colorButton: {
     flex: 1,
     height: 64,
-    borderRadius: 16,
+    borderRadius: Radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   colorLabel: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontWeight: '600',
   },
   picker: {
-    marginTop: 12,
+    marginTop: Spacing.sm,
   },
-  emojiGrid: {
+  iconGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: Spacing.xs,
   },
-  emojiButton: {
+  iconButtonItem: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#252525',
+    backgroundColor: Colors.bg.subtle,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  emojiButtonSelected: {
-    backgroundColor: '#6366F1',
-  },
-  emoji: {
-    fontSize: 24,
+  iconSymbol: {
+    fontSize: 20,
+    color: Colors.text.secondary,
+    fontWeight: '700',
   },
   colorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: Spacing.sm,
   },
   colorOption: {
     width: 44,
@@ -406,43 +424,52 @@ const styles = StyleSheet.create({
   },
   colorOptionSelected: {
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.white,
   },
   optionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: Spacing.xs,
   },
   option: {
-    backgroundColor: '#1A1A1A',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: 'transparent',
+    backgroundColor: Colors.bg.elevated,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.border.primary,
     minWidth: '30%',
     alignItems: 'center',
   },
   optionSelected: {
-    borderColor: '#6366F1',
+    borderColor: Colors.accent.primary,
+    backgroundColor: Colors.accent.ghost,
   },
   optionText: {
-    color: '#FFFFFF',
+    color: Colors.text.secondary,
     fontWeight: '500',
   },
   optionTextSelected: {
-    color: '#6366F1',
+    color: Colors.accent.primary,
   },
   xpText: {
-    color: '#FBBF24',
+    color: Colors.xp.primary,
     fontSize: 12,
-    marginTop: 4,
+    marginTop: Spacing.xxs,
+    fontWeight: '600',
   },
   actions: {
-    marginTop: 12,
-    gap: 12,
+    marginTop: Spacing.sm,
+    gap: Spacing.sm,
   },
   deleteButton: {
-    marginTop: 8,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    backgroundColor: Colors.semantic.errorMuted,
+    borderRadius: Radius.md,
+  },
+  deleteText: {
+    color: Colors.semantic.error,
+    ...Typography.bodySemibold,
   },
 });

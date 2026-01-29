@@ -8,7 +8,9 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { HabitWithStreak } from '../../types';
-import { XP_VALUES } from '../../constants';
+import { XP_VALUES, CATEGORY_COLORS } from '../../constants';
+import { ChipTag } from '../ui/ChipTag';
+import { Colors, Typography, Spacing, Radius, Shadows, Icons } from '../../constants/design';
 
 interface HabitCardProps {
   habit: HabitWithStreak;
@@ -19,20 +21,16 @@ interface HabitCardProps {
 export function HabitCard({ habit, onPress, onComplete }: HabitCardProps) {
   const scale = useSharedValue(1);
   const checkScale = useSharedValue(habit.completedToday ? 1 : 0);
+  const categoryColor = CATEGORY_COLORS[habit.category] || Colors.accent.primary;
 
   const handleComplete = async () => {
     if (habit.completedToday) return;
-    
-    // Haptic feedback
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
-    // Animate
     scale.value = withSequence(
-      withSpring(0.95, { damping: 10 }),
+      withSpring(0.97, { damping: 10 }),
       withSpring(1, { damping: 10 })
     );
     checkScale.value = withSpring(1, { damping: 12 });
-    
     onComplete();
   };
 
@@ -49,45 +47,53 @@ export function HabitCard({ habit, onPress, onComplete }: HabitCardProps) {
   const baseXP = XP_VALUES[habit.difficulty];
 
   return (
-    <Animated.View style={animatedCardStyle}>
+    <Animated.View style={[animatedCardStyle, styles.wrapper]}>
       <Pressable
         style={[styles.card, habit.completedToday && styles.cardCompleted]}
         onPress={onPress}
       >
+        {/* Category accent bar */}
+        <View style={[styles.accentBar, { backgroundColor: categoryColor }]} />
+
+        {/* Checkbox */}
         <TouchableOpacity
           style={[
             styles.checkbox,
-            { borderColor: habit.color },
-            habit.completedToday && { backgroundColor: habit.color },
+            { borderColor: categoryColor },
+            habit.completedToday && { backgroundColor: categoryColor, borderColor: categoryColor },
           ]}
           onPress={handleComplete}
           activeOpacity={0.7}
         >
           {habit.completedToday && (
-            <Animated.Text style={[styles.checkmark, animatedCheckStyle]}>✓</Animated.Text>
+            <Animated.Text style={[styles.checkmark, animatedCheckStyle]}>
+              {Icons.check}
+            </Animated.Text>
           )}
         </TouchableOpacity>
 
+        {/* Content */}
         <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={styles.icon}>{habit.icon}</Text>
-            <Text
-              style={[styles.name, habit.completedToday && styles.nameCompleted]}
-              numberOfLines={1}
-            >
-              {habit.name}
-            </Text>
-          </View>
-          
+          <Text
+            style={[styles.name, habit.completedToday && styles.nameCompleted]}
+            numberOfLines={1}
+          >
+            {habit.name}
+          </Text>
           <View style={styles.footer}>
-            <View style={styles.xpBadge}>
-              <Text style={styles.xpText}>+{baseXP} XP</Text>
-            </View>
-            
+            <ChipTag
+              label={`+${baseXP} XP`}
+              color={Colors.xp.primary}
+              icon={Icons.xp}
+              size="sm"
+            />
             {currentStreak > 0 && (
-              <View style={styles.streakBadge}>
-                <Text style={styles.streakText}>🔥 {currentStreak}</Text>
-              </View>
+              <ChipTag
+                label={`${currentStreak}`}
+                color={Colors.streak.primary}
+                icon={Icons.streak}
+                size="sm"
+              />
             )}
           </View>
         </View>
@@ -97,78 +103,61 @@ export function HabitCard({ habit, onPress, onComplete }: HabitCardProps) {
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: Spacing.sm,
+  },
   card: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    paddingLeft: Spacing.md + 4, // Account for accent bar
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+    overflow: 'hidden',
   },
   cardCompleted: {
-    opacity: 0.7,
+    opacity: 0.6,
+  },
+  accentBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    borderTopLeftRadius: Radius.lg,
+    borderBottomLeftRadius: Radius.lg,
   },
   checkbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 26,
+    height: 26,
+    borderRadius: Radius.sm,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: Spacing.sm,
   },
   checkmark: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: Colors.white,
+    fontSize: 14,
     fontWeight: '700',
   },
   content: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  icon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
   name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    flex: 1,
+    ...Typography.bodySemibold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
   },
   nameCompleted: {
     textDecorationLine: 'line-through',
-    color: '#A1A1A1',
+    color: Colors.text.tertiary,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  xpBadge: {
-    backgroundColor: 'rgba(251, 191, 36, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  xpText: {
-    color: '#FBBF24',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  streakBadge: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  streakText: {
-    color: '#EF4444',
-    fontSize: 12,
-    fontWeight: '600',
+    gap: Spacing.xs,
   },
 });

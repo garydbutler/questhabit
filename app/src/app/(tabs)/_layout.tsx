@@ -1,25 +1,43 @@
 import { Tabs } from 'expo-router';
-import { Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Colors, Spacing, Radius, Icons } from '../../constants/design';
+
+function TabIcon({ symbol, color, focused }: { symbol: string; color: string; focused: boolean }) {
+  return (
+    <View style={styles.tabIconContainer}>
+      <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+        <Text style={[styles.tabIconText, { color }]}>{symbol}</Text>
+      </View>
+      {focused && <View style={[styles.activeIndicator, { backgroundColor: color }]} />}
+    </View>
+  );
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#6366F1',
-        tabBarInactiveTintColor: '#6B6B6B',
+        tabBarActiveTintColor: Colors.accent.primary,
+        tabBarInactiveTintColor: Colors.text.muted,
         tabBarLabelStyle: styles.tabBarLabel,
-        headerStyle: { backgroundColor: '#0F0F0F' },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: { fontWeight: '600' },
+        headerStyle: {
+          backgroundColor: Colors.bg.primary,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+        headerTintColor: Colors.text.primary,
+        headerTitleStyle: { fontWeight: '600', letterSpacing: -0.3 },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Today',
-          tabBarIcon: ({ color }) => (
-            <Text style={[styles.tabIcon, { color }]}>🎯</Text>
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon symbol={Icons.today} color={color} focused={focused} />
           ),
         }}
       />
@@ -27,8 +45,9 @@ export default function TabsLayout() {
         name="coach"
         options={{
           title: 'Coach',
-          tabBarIcon: ({ color }) => (
-            <Text style={[styles.tabIcon, { color }]}>🤖</Text>
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon symbol={Icons.coach} color={color} focused={focused} />
           ),
         }}
       />
@@ -36,8 +55,8 @@ export default function TabsLayout() {
         name="stats"
         options={{
           title: 'Stats',
-          tabBarIcon: ({ color }) => (
-            <Text style={[styles.tabIcon, { color }]}>📊</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon symbol={Icons.stats} color={color} focused={focused} />
           ),
         }}
       />
@@ -45,8 +64,8 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <Text style={[styles.tabIcon, { color }]}>👤</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon symbol={Icons.profile} color={color} focused={focused} />
           ),
         }}
       />
@@ -54,8 +73,8 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <Text style={[styles.tabIcon, { color }]}>⚙️</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon symbol={Icons.settings} color={color} focused={focused} />
           ),
         }}
       />
@@ -65,17 +84,42 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1A1A1A',
-    borderTopColor: '#252525',
-    paddingTop: 8,
-    height: 60,
+    backgroundColor: Colors.bg.primary,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border.subtle,
+    paddingTop: Spacing.xs,
+    height: 64,
+    elevation: 0,
   },
   tabBarLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
+    letterSpacing: 0.2,
     marginBottom: 4,
   },
-  tabIcon: {
-    fontSize: 24,
+  tabIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  iconWrap: {
+    width: 32,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Radius.sm,
+  },
+  iconWrapActive: {
+    backgroundColor: Colors.accent.ghost,
+  },
+  tabIconText: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  activeIndicator: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: -1,
   },
 });

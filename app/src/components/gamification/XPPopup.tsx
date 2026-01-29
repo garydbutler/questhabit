@@ -8,6 +8,7 @@ import Animated, {
   withDelay,
   runOnJS,
 } from 'react-native-reanimated';
+import { Colors, Radius, Spacing, Icons } from '../../constants/design';
 
 interface XPPopupProps {
   xp: number;
@@ -50,6 +51,7 @@ export function XPPopup({ xp, onComplete }: XPPopupProps) {
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
+      <Text style={styles.icon}>{Icons.xp}</Text>
       <Text style={styles.text}>+{xp} XP</Text>
     </Animated.View>
   );
@@ -59,16 +61,25 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     top: -10,
-    right: 16,
-    backgroundColor: 'rgba(251, 191, 36, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    right: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.xp.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xxs + 2,
+    borderRadius: Radius.full,
     zIndex: 100,
+    gap: 4,
+  },
+  icon: {
+    color: Colors.text.inverse,
+    fontSize: 12,
+    fontWeight: '700',
   },
   text: {
-    color: '#0F0F0F',
+    color: Colors.text.inverse,
     fontSize: 14,
     fontWeight: '700',
+    letterSpacing: -0.3,
   },
 });

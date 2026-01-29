@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,13 @@ import { useHabitStore } from '../../stores/habitStore';
 import { LevelBadge } from '../../components/gamification/LevelBadge';
 import { CalendarHeatmap } from '../../components/stats/CalendarHeatmap';
 import { Card } from '../../components/ui/Card';
+import { StatCard } from '../../components/ui/StatCard';
+import { SectionHeader } from '../../components/ui/SectionHeader';
+import { IconBadge } from '../../components/ui/IconBadge';
+import { ChipTag } from '../../components/ui/ChipTag';
 import { supabase } from '../../lib/supabase';
+import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/design';
+import { CATEGORY_COLORS } from '../../constants';
 
 export default function StatsScreen() {
   const { user } = useAuthStore();
@@ -27,7 +33,6 @@ export default function StatsScreen() {
 
   const loadHeatmapData = async () => {
     if (!user) return;
-    
     try {
       const startDate = format(subDays(new Date(), 16 * 7), 'yyyy-MM-dd');
       const { data: completions } = await supabase
@@ -36,7 +41,6 @@ export default function StatsScreen() {
         .eq('user_id', user.id)
         .gte('completed_date', startDate);
 
-      // Count completions per day
       const countByDate = new Map<string, number>();
       completions?.forEach((c: any) => {
         const date = c.completed_date;
@@ -67,7 +71,6 @@ export default function StatsScreen() {
   }
 
   const activeHabits = habits.filter(h => !h.isArchived);
-  const totalCompletions = habits.reduce((sum, h) => sum + (h.completedToday ? 1 : 0), 0);
   const bestStreak = Math.max(...habits.map(h => h.streak?.bestStreak || 0), 0);
   const currentStreaks = habits.map(h => h.streak?.currentStreak || 0);
   const avgStreak = currentStreaks.length > 0
@@ -78,13 +81,13 @@ export default function StatsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Level Card */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Your Progress</Text>
+        <SectionHeader title="Your Progress" />
         <LevelBadge totalXP={user.totalXp} />
       </View>
 
       {/* Calendar Heatmap */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Activity</Text>
+        <SectionHeader title="Activity" />
         <CalendarHeatmap
           data={heatmapData}
           weeks={16}
@@ -101,30 +104,40 @@ export default function StatsScreen() {
 
       {/* Stats Grid */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Statistics</Text>
+        <SectionHeader title="Statistics" />
         <View style={styles.grid}>
-          <Card style={styles.statCard}>
-            <Text style={styles.statValue}>{user.totalXp}</Text>
-            <Text style={styles.statLabel}>Total XP</Text>
-          </Card>
-          <Card style={styles.statCard}>
-            <Text style={styles.statValue}>{user.level}</Text>
-            <Text style={styles.statLabel}>Level</Text>
-          </Card>
-          <Card style={styles.statCard}>
-            <Text style={styles.statValue}>{activeHabits.length}</Text>
-            <Text style={styles.statLabel}>Active Habits</Text>
-          </Card>
-          <Card style={styles.statCard}>
-            <Text style={styles.statValue}>{bestStreak}</Text>
-            <Text style={styles.statLabel}>Best Streak</Text>
-          </Card>
+          <StatCard
+            value={user.totalXp.toLocaleString()}
+            label="Total XP"
+            color={Colors.xp.primary}
+            icon={Icons.xp}
+          />
+          <StatCard
+            value={user.level}
+            label="Level"
+            color={Colors.accent.primary}
+            icon={Icons.level}
+          />
+        </View>
+        <View style={[styles.grid, { marginTop: Spacing.sm }]}>
+          <StatCard
+            value={activeHabits.length}
+            label="Active Habits"
+            color={Colors.semantic.info}
+            icon={Icons.today}
+          />
+          <StatCard
+            value={bestStreak}
+            label="Best Streak"
+            color={Colors.streak.primary}
+            icon={Icons.streak}
+          />
         </View>
       </View>
 
       {/* Habits Overview */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Habits Overview</Text>
+        <SectionHeader title="Habits Overview" />
         {activeHabits.length === 0 ? (
           <Card>
             <Text style={styles.emptyText}>
@@ -135,22 +148,28 @@ export default function StatsScreen() {
           activeHabits.map(habit => (
             <Card key={habit.id} style={styles.habitStat}>
               <View style={styles.habitHeader}>
-                <Text style={styles.habitIcon}>{habit.icon}</Text>
+                <View style={[styles.habitDot, { backgroundColor: CATEGORY_COLORS[habit.category] }]} />
                 <Text style={styles.habitName} numberOfLines={1}>
                   {habit.name}
                 </Text>
               </View>
               <View style={styles.habitStats}>
                 <View style={styles.habitStatItem}>
-                  <Text style={styles.habitStatValue}>
-                    🔥 {habit.streak?.currentStreak || 0}
-                  </Text>
+                  <ChipTag
+                    label={`${habit.streak?.currentStreak || 0}`}
+                    color={Colors.streak.primary}
+                    icon={Icons.streak}
+                    size="sm"
+                  />
                   <Text style={styles.habitStatLabel}>Current</Text>
                 </View>
                 <View style={styles.habitStatItem}>
-                  <Text style={styles.habitStatValue}>
-                    ⭐ {habit.streak?.bestStreak || 0}
-                  </Text>
+                  <ChipTag
+                    label={`${habit.streak?.bestStreak || 0}`}
+                    color={Colors.xp.primary}
+                    icon={Icons.trophy}
+                    size="sm"
+                  />
                   <Text style={styles.habitStatLabel}>Best</Text>
                 </View>
               </View>
@@ -165,99 +184,64 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   content: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: Spacing.lg,
+    paddingBottom: Spacing['3xl'],
   },
   section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    marginBottom: Spacing.xl,
   },
   grid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  statCard: {
-    width: '47%',
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#6366F1',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#A1A1A1',
+    gap: Spacing.sm,
   },
   habitStat: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.xs,
   },
   habitHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    gap: Spacing.sm,
   },
-  habitIcon: {
-    fontSize: 20,
-    marginRight: 10,
+  habitDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   habitName: {
-    fontSize: 16,
-    color: '#FFFFFF',
+    ...Typography.bodyMedium,
+    color: Colors.text.primary,
     flex: 1,
   },
   habitStats: {
     flexDirection: 'row',
-    gap: 16,
+    gap: Spacing.md,
   },
   habitStatItem: {
     alignItems: 'center',
-  },
-  habitStatValue: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    marginBottom: 2,
+    gap: 4,
   },
   habitStatLabel: {
-    fontSize: 10,
-    color: '#6B6B6B',
+    ...Typography.label,
+    color: Colors.text.muted,
+    fontSize: 9,
   },
   emptyText: {
-    color: '#A1A1A1',
+    color: Colors.text.tertiary,
     textAlign: 'center',
-    paddingVertical: 20,
-  },
-  comingSoon: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  comingSoonIcon: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  comingSoonText: {
-    color: '#A1A1A1',
-    textAlign: 'center',
-    fontSize: 14,
-    lineHeight: 20,
+    paddingVertical: Spacing.lg,
+    ...Typography.caption,
   },
   message: {
-    color: '#A1A1A1',
+    color: Colors.text.tertiary,
     textAlign: 'center',
-    marginTop: 40,
+    marginTop: Spacing['3xl'],
+    ...Typography.body,
   },
 });

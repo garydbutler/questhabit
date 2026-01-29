@@ -9,47 +9,54 @@ import {
   Animated as RNAnimated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../stores/authStore';
-import { Button } from '../components/ui/Button';
+import { GradientButton } from '../components/ui/GradientButton';
+import { Colors, Typography, Spacing, Radius, Icons } from '../constants/design';
 
 const { width } = Dimensions.get('window');
 
 interface OnboardingSlide {
   id: string;
-  emoji: string;
+  symbol: string;
   title: string;
   subtitle: string;
   color: string;
+  bgColor: string;
 }
 
 const SLIDES: OnboardingSlide[] = [
   {
     id: '1',
-    emoji: '⚔️',
+    symbol: '\u25B2',
     title: 'Turn Habits Into Quests',
     subtitle: 'Every habit is an adventure waiting to happen. Complete daily quests to earn XP and level up your real life.',
-    color: '#6366F1',
+    color: Colors.accent.primary,
+    bgColor: 'rgba(6, 182, 212, 0.08)',
   },
   {
     id: '2',
-    emoji: '🔥',
+    symbol: '\u2B22',
     title: 'Build Unstoppable Streaks',
     subtitle: 'Watch your streaks grow day by day. The longer your streak, the more bonus XP you earn. Consistency is power.',
-    color: '#EF4444',
+    color: Colors.streak.primary,
+    bgColor: 'rgba(249, 115, 22, 0.08)',
   },
   {
     id: '3',
-    emoji: '🏆',
+    symbol: '\u2605',
     title: 'Unlock Achievements',
-    subtitle: 'From First Step to Monthly Master — unlock badges that celebrate your progress. Collect them all!',
-    color: '#FBBF24',
+    subtitle: 'From First Step to Monthly Master \u2014 unlock badges that celebrate your progress. Collect them all!',
+    color: Colors.xp.primary,
+    bgColor: 'rgba(245, 158, 11, 0.08)',
   },
   {
     id: '4',
-    emoji: '🤖',
+    symbol: '\u2666',
     title: 'AI-Powered Coaching',
     subtitle: 'Get personalized tips, motivation, and insights from your AI coach. It learns your patterns and helps you improve.',
-    color: '#22C55E',
+    color: Colors.semantic.success,
+    bgColor: 'rgba(16, 185, 129, 0.08)',
   },
 ];
 
@@ -83,8 +90,8 @@ export default function OnboardingScreen() {
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => (
     <View style={[styles.slide, { width }]}>
-      <View style={[styles.emojiContainer, { backgroundColor: `${item.color}20` }]}>
-        <Text style={styles.emoji}>{item.emoji}</Text>
+      <View style={[styles.symbolContainer, { backgroundColor: item.bgColor }]}>
+        <Text style={[styles.symbol, { color: item.color }]}>{item.symbol}</Text>
       </View>
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.subtitle}>{item.subtitle}</Text>
@@ -95,6 +102,11 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
+      <LinearGradient
+        colors={['#0B0F1A', '#111827']}
+        style={StyleSheet.absoluteFillObject}
+      />
+
       {/* Skip button */}
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
         <Text style={styles.skipText}>{isLastSlide ? '' : 'Skip'}</Text>
@@ -157,11 +169,11 @@ export default function OnboardingScreen() {
         </View>
 
         {/* Button */}
-        <Button
-          title={isLastSlide ? "Let's Go!" : 'Next'}
+        <GradientButton
+          title={isLastSlide ? "Let's Go" : 'Next'}
           onPress={handleNext}
           size="lg"
-          style={[styles.nextButton, { backgroundColor: SLIDES[currentIndex].color }]}
+          fullWidth
         />
       </View>
     </View>
@@ -171,66 +183,62 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   skipButton: {
     position: 'absolute',
     top: 60,
-    right: 24,
+    right: Spacing.xl,
     zIndex: 10,
-    padding: 8,
+    padding: Spacing.xs,
   },
   skipText: {
-    color: '#A1A1A1',
-    fontSize: 16,
-    fontWeight: '500',
+    color: Colors.text.tertiary,
+    ...Typography.bodyMedium,
   },
   slide: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: Spacing['3xl'],
   },
-  emojiContainer: {
+  symbolContainer: {
     width: 120,
     height: 120,
-    borderRadius: 32,
+    borderRadius: Radius['2xl'],
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: Spacing['3xl'],
   },
-  emoji: {
-    fontSize: 56,
+  symbol: {
+    fontSize: 48,
+    fontWeight: '700',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...Typography.h1,
+    color: Colors.text.primary,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#A1A1A1',
+    ...Typography.body,
+    color: Colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 24,
   },
   bottom: {
-    paddingHorizontal: 24,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: 50,
   },
   dots: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 32,
-    gap: 8,
+    marginBottom: Spacing['2xl'],
+    gap: Spacing.xs,
   },
   dot: {
     height: 8,
     borderRadius: 4,
-  },
-  nextButton: {
-    width: '100%',
   },
 });
