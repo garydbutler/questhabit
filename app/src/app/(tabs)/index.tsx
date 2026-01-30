@@ -135,11 +135,17 @@ export default function HomeScreen() {
                 Create your first habit to start earning XP
               </Text>
               <GradientButton
-                title="Create Quest"
-                icon={Icons.add}
-                onPress={() => router.push('/habit/new')}
+                title="Browse Templates"
+                icon={Icons.trophy}
+                onPress={() => router.push('/templates')}
                 style={{ marginTop: Spacing.lg }}
               />
+              <TouchableOpacity
+                style={styles.createCustomLink}
+                onPress={() => router.push('/habit/new')}
+              >
+                <Text style={styles.createCustomText}>or create a custom quest</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             todayHabits.map(habit => (
@@ -262,6 +268,15 @@ const styles = StyleSheet.create({
     color: Colors.text.tertiary,
     textAlign: 'center',
     paddingHorizontal: Spacing['3xl'],
+  },
+  createCustomLink: {
+    marginTop: Spacing.md,
+    paddingVertical: Spacing.xs,
+  },
+  createCustomText: {
+    ...Typography.captionMedium,
+    color: Colors.accent.primary,
+    textDecorationLine: 'underline',
   },
   fab: {
     position: 'absolute',

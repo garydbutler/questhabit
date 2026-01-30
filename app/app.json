@@ -36,7 +36,16 @@
     },
     "plugins": [
       "expo-router",
-      "expo-haptics"
+      "expo-haptics",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#06B6D4",
+          "defaultChannel": "habit-reminders",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

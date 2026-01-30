@@ -16,6 +16,7 @@ import { Button } from '../../components/ui/Button';
 import { IconBadge } from '../../components/ui/IconBadge';
 import { GradientCard } from '../../components/ui/GradientCard';
 import { SectionHeader } from '../../components/ui/SectionHeader';
+import { NotificationSettings } from '../../components/notifications/NotificationSettings';
 import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/design';
 
 export default function SettingsScreen() {
@@ -151,33 +152,15 @@ export default function SettingsScreen() {
         </View>
       )}
 
+      {/* Notifications — Full Settings Panel */}
+      <View style={styles.section}>
+        <NotificationSettings />
+      </View>
+
       {/* App Settings */}
       <View style={styles.section}>
         <SectionHeader title="App Settings" />
         <Card>
-          <View style={[styles.settingsItem, styles.settingsItemBorder]}>
-            <IconBadge symbol={'\u266A'} color={Colors.accent.primary} size="sm" />
-            <View style={styles.settingsContent}>
-              <Text style={styles.settingsTitle}>Notifications</Text>
-              <Text style={styles.settingsSubtitle}>Habit reminders</Text>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{ false: Colors.border.primary, true: Colors.accent.muted }}
-              thumbColor={notificationsEnabled ? Colors.accent.primary : Colors.text.muted}
-              ios_backgroundColor={Colors.border.primary}
-            />
-          </View>
-          <SettingsItem
-            symbol={'\u23F0'}
-            symbolColor={Colors.semantic.warning}
-            title="Default Reminder"
-            subtitle={dailyReminderTime}
-            onPress={() => {
-              Alert.alert('Coming Soon', 'Custom reminder time picker will be available in a future update.');
-            }}
-          />
           <SettingsItem
             symbol={'\u25CF'}
             symbolColor={Colors.accent.primary}

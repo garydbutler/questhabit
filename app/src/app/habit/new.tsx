@@ -70,6 +70,22 @@ export default function NewHabitScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Template Shortcut Banner */}
+      <TouchableOpacity
+        style={styles.templateBanner}
+        onPress={() => router.push('/templates')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.templateBannerIcon}>
+          <Text style={styles.templateBannerIconText}>{Icons.trophy}</Text>
+        </View>
+        <View style={styles.templateBannerContent}>
+          <Text style={styles.templateBannerTitle}>Start from a template</Text>
+          <Text style={styles.templateBannerSubtitle}>25+ pre-built quests to choose from</Text>
+        </View>
+        <Text style={styles.templateBannerChevron}>{Icons.chevronRight}</Text>
+      </TouchableOpacity>
+
       {/* Name & Description */}
       <View style={styles.section}>
         <Input
@@ -353,6 +369,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: Spacing.xxs,
     fontWeight: '600',
+  },
+  templateBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.accent.ghost,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.accent.muted,
+    padding: Spacing.md,
+    marginBottom: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  templateBannerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.accent.muted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  templateBannerIconText: {
+    fontSize: 18,
+    color: Colors.accent.primary,
+    fontWeight: '700',
+  },
+  templateBannerContent: {
+    flex: 1,
+  },
+  templateBannerTitle: {
+    ...Typography.bodySemibold,
+    color: Colors.accent.primary,
+  },
+  templateBannerSubtitle: {
+    ...Typography.caption,
+    color: Colors.text.tertiary,
+    marginTop: 1,
+  },
+  templateBannerChevron: {
+    fontSize: 18,
+    color: Colors.accent.primary,
   },
   submitSection: {
     marginTop: Spacing.sm,
