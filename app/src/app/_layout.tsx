@@ -48,6 +48,13 @@ export default function RootLayout() {
             presentation: 'modal',
           }}
         />
+        <Stack.Screen
+          name="pro"
+          options={{
+            title: 'QuestHabit Pro',
+            presentation: 'modal',
+          }}
+        />
       </Stack>
       <StatusBar style="light" />
     </>
