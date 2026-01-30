@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "questhabit",
+    "name": "QuestHabit",
     "slug": "questhabit",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,14 +15,19 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.questhabit.app"
+      "bundleIdentifier": "com.questhabit.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "QuestHabit uses the camera for your profile photo.",
+        "NSPhotoLibraryUsageDescription": "QuestHabit accesses your photos for your profile."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F0F0F"
       },
-      "package": "com.questhabit.app"
+      "package": "com.questhabit.app",
+      "permissions": ["NOTIFICATIONS", "VIBRATE"]
     },
     "web": {
       "bundler": "metro",
@@ -30,10 +35,16 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-haptics"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }
