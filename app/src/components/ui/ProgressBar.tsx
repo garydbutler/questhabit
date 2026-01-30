@@ -4,6 +4,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { Colors, Radius } from '../../constants/design';
 
 interface ProgressBarProps {
   progress: number; // 0 to 1
@@ -15,8 +16,8 @@ interface ProgressBarProps {
 
 export function ProgressBar({
   progress,
-  color = '#6366F1',
-  backgroundColor = '#252525',
+  color = Colors.accent.primary,
+  backgroundColor = Colors.border.primary,
   height = 8,
   style,
 }: ProgressBarProps) {
@@ -30,19 +31,23 @@ export function ProgressBar({
   });
 
   return (
-    <View style={[styles.container, { backgroundColor, height }, style]}>
-      <Animated.View style={[styles.fill, { backgroundColor: color }, animatedStyle]} />
+    <View style={[styles.container, { backgroundColor, height, borderRadius: height / 2 }, style]}>
+      <Animated.View
+        style={[
+          styles.fill,
+          { backgroundColor: color, borderRadius: height / 2 },
+          animatedStyle,
+        ]}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 100,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 100,
   },
 });

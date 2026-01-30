@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { format, subDays, startOfWeek, addDays, isToday, isSameDay } from 'date-fns';
+import { format, subDays, startOfWeek, addDays, isToday } from 'date-fns';
+import { Colors, Typography, Spacing, Radius } from '../../constants/design';
 
 interface CompletionData {
-  date: string; // YYYY-MM-DD
+  date: string;
   count: number;
   total: number;
 }
@@ -19,13 +20,13 @@ const CELL_GAP = 3;
 const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 function getIntensityColor(count: number, total: number): string {
-  if (total === 0 || count === 0) return '#1A1A1A';
+  if (total === 0 || count === 0) return Colors.bg.elevated;
   const ratio = count / total;
-  if (ratio >= 1) return '#22C55E';      // Perfect day - bright green
-  if (ratio >= 0.75) return '#16A34A';   // 75%+ - green
-  if (ratio >= 0.5) return '#15803D';    // 50%+ - medium green
-  if (ratio >= 0.25) return '#166534';   // 25%+ - dark green
-  return '#14532D';                       // Some activity
+  if (ratio >= 1) return Colors.semantic.success;
+  if (ratio >= 0.75) return '#059669';
+  if (ratio >= 0.5) return '#047857';
+  if (ratio >= 0.25) return '#065F46';
+  return '#064E3B';
 }
 
 export function CalendarHeatmap({ data, weeks = 16, onDayPress }: CalendarHeatmapProps) {
@@ -33,11 +34,9 @@ export function CalendarHeatmap({ data, weeks = 16, onDayPress }: CalendarHeatma
     const today = new Date();
     const startDate = startOfWeek(subDays(today, (weeks - 1) * 7), { weekStartsOn: 0 });
     
-    // Build data lookup
     const dataMap = new Map<string, CompletionData>();
     data.forEach(d => dataMap.set(d.date, d));
 
-    // Build grid: weeks x 7 days
     const grid: Array<Array<{ date: Date; dateStr: string; data?: CompletionData }>> = [];
     const monthLabels: Array<{ label: string; weekIndex: number }> = [];
     let lastMonth = -1;
@@ -48,7 +47,6 @@ export function CalendarHeatmap({ data, weeks = 16, onDayPress }: CalendarHeatma
         const date = addDays(startDate, w * 7 + d);
         const dateStr = format(date, 'yyyy-MM-dd');
         
-        // Track month boundaries
         const month = date.getMonth();
         if (month !== lastMonth && d === 0) {
           monthLabels.push({ label: format(date, 'MMM'), weekIndex: w });
@@ -111,10 +109,10 @@ export function CalendarHeatmap({ data, weeks = 16, onDayPress }: CalendarHeatma
                 {week.map((day, dayIndex) => {
                   const isFuture = day.date > new Date();
                   const color = isFuture
-                    ? '#0F0F0F'
+                    ? Colors.bg.primary
                     : day.data
                     ? getIntensityColor(day.data.count, day.data.total)
-                    : '#1A1A1A';
+                    : Colors.bg.elevated;
 
                   return (
                     <TouchableOpacity
@@ -139,7 +137,7 @@ export function CalendarHeatmap({ data, weeks = 16, onDayPress }: CalendarHeatma
       {/* Legend */}
       <View style={styles.legend}>
         <Text style={styles.legendLabel}>Less</Text>
-        {['#1A1A1A', '#14532D', '#166534', '#15803D', '#16A34A', '#22C55E'].map((c, i) => (
+        {[Colors.bg.elevated, '#064E3B', '#065F46', '#047857', '#059669', Colors.semantic.success].map((c, i) => (
           <View key={i} style={[styles.legendCell, { backgroundColor: c }]} />
         ))}
         <Text style={styles.legendLabel}>More</Text>
@@ -150,9 +148,11 @@ export function CalendarHeatmap({ data, weeks = 16, onDayPress }: CalendarHeatma
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
   },
   monthRow: {
     flexDirection: 'row',
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     position: 'absolute',
-    color: '#6B6B6B',
+    color: Colors.text.muted,
     fontSize: 10,
   },
   gridContainer: {
@@ -181,11 +181,11 @@ const styles = StyleSheet.create({
     width: 24,
   },
   dayLabelText: {
-    color: '#6B6B6B',
+    color: Colors.text.muted,
     fontSize: 9,
   },
   scrollContent: {
-    paddingRight: 8,
+    paddingRight: Spacing.xs,
   },
   grid: {
     flexDirection: 'row',
@@ -201,14 +201,14 @@ const styles = StyleSheet.create({
   },
   todayCell: {
     borderWidth: 1,
-    borderColor: '#6366F1',
+    borderColor: Colors.accent.primary,
   },
   legend: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: 4,
-    marginTop: 12,
+    marginTop: Spacing.sm,
   },
   legendCell: {
     width: 12,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   legendLabel: {
-    color: '#6B6B6B',
+    color: Colors.text.muted,
     fontSize: 10,
   },
 });

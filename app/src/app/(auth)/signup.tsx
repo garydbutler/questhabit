@@ -9,9 +9,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../../stores/authStore';
 import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
+import { GradientButton } from '../../components/ui/GradientButton';
+import { Colors, Typography, Spacing, Icons } from '../../constants/design';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -46,13 +48,19 @@ export default function SignUpScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <LinearGradient
+        colors={['#0B0F1A', '#111827']}
+        style={StyleSheet.absoluteFillObject}
+      />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🦸</Text>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logoSymbol}>{Icons.sparkle}</Text>
+          </View>
           <Text style={styles.title}>Join QuestHabit</Text>
           <Text style={styles.subtitle}>Start your journey to better habits</Text>
         </View>
@@ -103,12 +111,13 @@ export default function SignUpScreen() {
             <Text style={styles.error}>{error || localError}</Text>
           )}
 
-          <Button
+          <GradientButton
             title="Create Account"
             onPress={handleSignUp}
             loading={isLoading}
             disabled={!email || !password || !confirmPassword}
-            style={styles.button}
+            fullWidth
+            size="lg"
           />
         </View>
 
@@ -127,42 +136,48 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   content: {
     flexGrow: 1,
-    padding: 24,
+    padding: Spacing.xl,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: Spacing['3xl'],
   },
-  logo: {
-    fontSize: 64,
-    marginBottom: 16,
+  logoContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: Colors.accent.ghost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
+  logoSymbol: {
+    fontSize: 32,
+    color: Colors.accent.primary,
+    fontWeight: '700',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    ...Typography.h1,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#A1A1A1',
+    ...Typography.body,
+    color: Colors.text.tertiary,
   },
   form: {
-    marginBottom: 24,
+    marginBottom: Spacing.xl,
   },
   error: {
-    color: '#EF4444',
-    fontSize: 14,
+    color: Colors.semantic.error,
+    ...Typography.caption,
     textAlign: 'center',
-    marginBottom: 16,
-  },
-  button: {
-    marginTop: 8,
+    marginBottom: Spacing.md,
   },
   footer: {
     flexDirection: 'row',
@@ -171,12 +186,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   footerText: {
-    color: '#A1A1A1',
-    fontSize: 14,
+    color: Colors.text.tertiary,
+    ...Typography.caption,
   },
   footerLink: {
-    color: '#6366F1',
-    fontSize: 14,
-    fontWeight: '600',
+    color: Colors.accent.primary,
+    ...Typography.captionMedium,
   },
 });

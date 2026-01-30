@@ -9,9 +9,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../../stores/authStore';
 import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
+import { GradientButton } from '../../components/ui/GradientButton';
+import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/design';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -21,7 +23,6 @@ export default function LoginScreen() {
 
   const handleSignIn = async () => {
     if (!email || !password) return;
-    
     const result = await signIn(email, password);
     if (result.success) {
       router.replace('/(tabs)');
@@ -33,13 +34,19 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <LinearGradient
+        colors={['#0B0F1A', '#111827']}
+        style={StyleSheet.absoluteFillObject}
+      />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🦸</Text>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logoSymbol}>{Icons.shield}</Text>
+          </View>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue your journey</Text>
         </View>
@@ -73,12 +80,13 @@ export default function LoginScreen() {
 
           {error && <Text style={styles.error}>{error}</Text>}
 
-          <Button
+          <GradientButton
             title="Sign In"
             onPress={handleSignIn}
             loading={isLoading}
             disabled={!email || !password}
-            style={styles.button}
+            fullWidth
+            size="lg"
           />
         </View>
 
@@ -105,42 +113,48 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   content: {
     flexGrow: 1,
-    padding: 24,
+    padding: Spacing.xl,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: Spacing['3xl'],
   },
-  logo: {
-    fontSize: 64,
-    marginBottom: 16,
+  logoContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: Colors.accent.ghost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
+  logoSymbol: {
+    fontSize: 32,
+    color: Colors.accent.primary,
+    fontWeight: '700',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    ...Typography.h1,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#A1A1A1',
+    ...Typography.body,
+    color: Colors.text.tertiary,
   },
   form: {
-    marginBottom: 24,
+    marginBottom: Spacing.xl,
   },
   error: {
-    color: '#EF4444',
-    fontSize: 14,
+    color: Colors.semantic.error,
+    ...Typography.caption,
     textAlign: 'center',
-    marginBottom: 16,
-  },
-  button: {
-    marginTop: 8,
+    marginBottom: Spacing.md,
   },
   footer: {
     flexDirection: 'row',
@@ -149,20 +163,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   footerText: {
-    color: '#A1A1A1',
-    fontSize: 14,
+    color: Colors.text.tertiary,
+    ...Typography.caption,
   },
   footerLink: {
-    color: '#6366F1',
-    fontSize: 14,
-    fontWeight: '600',
+    color: Colors.accent.primary,
+    ...Typography.captionMedium,
   },
   skip: {
-    marginTop: 32,
+    marginTop: Spacing['2xl'],
     alignItems: 'center',
   },
   skipText: {
-    color: '#6B6B6B',
-    fontSize: 14,
+    color: Colors.text.muted,
+    ...Typography.caption,
   },
 });

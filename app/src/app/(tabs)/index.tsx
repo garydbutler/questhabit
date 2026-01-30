@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 import { useHabitStore } from '../../stores/habitStore';
@@ -15,6 +16,9 @@ import { HabitCard } from '../../components/habits/HabitCard';
 import { DailyProgress } from '../../components/habits/DailyProgress';
 import { LevelBadge } from '../../components/gamification/LevelBadge';
 import { XPPopup } from '../../components/gamification/XPPopup';
+import { SectionHeader } from '../../components/ui/SectionHeader';
+import { GradientButton } from '../../components/ui/GradientButton';
+import { Colors, Typography, Spacing, Radius, Shadows, Icons } from '../../constants/design';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -45,9 +49,7 @@ export default function HomeScreen() {
     const result = await completeHabit(habitId);
     if (result.success && result.xpEarned) {
       setXpPopup({ show: true, xp: result.xpEarned });
-      
       if (result.leveledUp) {
-        // TODO: Show level up celebration
         console.log('Level up!', result.newLevel);
       }
     }
@@ -56,72 +58,88 @@ export default function HomeScreen() {
   if (!user) {
     return (
       <View style={styles.authPrompt}>
-        <Text style={styles.authTitle}>Welcome to QuestHabit! ⚔️</Text>
+        <LinearGradient
+          colors={['#0B0F1A', '#111827']}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={styles.authIconContainer}>
+          <Text style={styles.authIcon}>{Icons.shield}</Text>
+        </View>
+        <Text style={styles.authTitle}>Welcome to QuestHabit</Text>
         <Text style={styles.authSubtitle}>
-          Sign in to start building habits
+          Build lasting habits through the power of gamification
         </Text>
-        <TouchableOpacity
-          style={styles.authButton}
+        <GradientButton
+          title="Get Started"
           onPress={() => router.push('/(auth)/login')}
-        >
-          <Text style={styles.authButtonText}>Get Started</Text>
-        </TouchableOpacity>
+          size="lg"
+          fullWidth
+        />
       </View>
     );
   }
 
   const today = new Date();
   const dateString = format(today, 'EEEE, MMMM d');
+  const greeting = getGreeting();
 
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#6366F1"
+            tintColor={Colors.accent.primary}
           />
         }
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>
-              Hello, {user.displayName || 'Hero'}! 👋
-            </Text>
-            <Text style={styles.date}>{dateString}</Text>
+        {/* Hero Header */}
+        <LinearGradient
+          colors={['#0B0F1A', '#111827', '#0F172A']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.heroGradient}
+        >
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.greeting}>{greeting}, {user.displayName || 'Hero'}</Text>
+              <Text style={styles.date}>{dateString}</Text>
+            </View>
+            <LevelBadge totalXP={user.totalXp} compact />
           </View>
-          <LevelBadge totalXP={user.totalXp} compact />
-        </View>
 
-        {/* Daily Progress */}
-        <DailyProgress completed={completedCount} total={todayHabits.length} />
+          {/* Daily Progress Ring Section */}
+          <DailyProgress completed={completedCount} total={todayHabits.length} />
+        </LinearGradient>
 
         {/* Habits List */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Habits</Text>
-            <TouchableOpacity onPress={() => router.push('/habit/new')}>
-              <Text style={styles.addButton}>+ Add</Text>
-            </TouchableOpacity>
-          </View>
+          <SectionHeader
+            title="Today's Quests"
+            subtitle={todayHabits.length > 0 ? `${completedCount} of ${todayHabits.length} complete` : undefined}
+            actionLabel="New"
+            onAction={() => router.push('/habit/new')}
+          />
 
           {todayHabits.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>🌟</Text>
-              <Text style={styles.emptyTitle}>No habits yet</Text>
+              <View style={styles.emptyIconContainer}>
+                <Text style={styles.emptyIcon}>{Icons.sparkle}</Text>
+              </View>
+              <Text style={styles.emptyTitle}>No quests yet</Text>
               <Text style={styles.emptySubtitle}>
-                Create your first habit to start earning XP!
+                Create your first habit to start earning XP
               </Text>
-              <TouchableOpacity
-                style={styles.createButton}
+              <GradientButton
+                title="Create Quest"
+                icon={Icons.add}
                 onPress={() => router.push('/habit/new')}
-              >
-                <Text style={styles.createButtonText}>Create Habit</Text>
-              </TouchableOpacity>
+                style={{ marginTop: Spacing.lg }}
+              />
             </View>
           ) : (
             todayHabits.map(habit => (
@@ -144,151 +162,157 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => router.push('/habit/new')}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      {todayHabits.length > 0 && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => router.push('/habit/new')}
+          activeOpacity={0.85}
+        >
+          <LinearGradient
+            colors={['#06B6D4', '#0891B2']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.fabGradient}
+          >
+            <Text style={styles.fabText}>{Icons.add}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
     </View>
   );
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    padding: 20,
     paddingBottom: 100,
+  },
+  heroGradient: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 60,
+    paddingBottom: Spacing.xl,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
+    alignItems: 'flex-start',
+    marginBottom: Spacing.xl,
+  },
+  headerLeft: {
+    flex: 1,
   },
   greeting: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
+    ...Typography.h1,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xxs,
   },
   date: {
-    fontSize: 14,
-    color: '#A1A1A1',
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
   section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  addButton: {
-    color: '#6366F1',
-    fontSize: 14,
-    fontWeight: '600',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
   },
   habitWrapper: {
     position: 'relative',
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 40,
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
+    paddingVertical: Spacing['3xl'],
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+  },
+  emptyIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: Colors.accent.ghost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
   },
   emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
+    fontSize: 28,
+    color: Colors.accent.primary,
+    fontWeight: '700',
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    ...Typography.h3,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#A1A1A1',
+    ...Typography.caption,
+    color: Colors.text.tertiary,
     textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 40,
-  },
-  createButton: {
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    paddingHorizontal: Spacing['3xl'],
   },
   fab: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 28,
     right: 24,
+    ...Shadows.accentGlow,
+  },
+  fabGradient: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#6366F1',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
   fabText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: 28,
     fontWeight: '300',
     marginTop: -2,
   },
   authPrompt: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 40,
+    padding: Spacing['3xl'],
+  },
+  authIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: Colors.accent.ghost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+  },
+  authIcon: {
+    fontSize: 36,
+    color: Colors.accent.primary,
+    fontWeight: '700',
   },
   authTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    ...Typography.h1,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
     textAlign: 'center',
   },
   authSubtitle: {
-    fontSize: 16,
-    color: '#A1A1A1',
-    marginBottom: 32,
+    ...Typography.body,
+    color: Colors.text.tertiary,
+    marginBottom: Spacing['2xl'],
     textAlign: 'center',
-  },
-  authButton: {
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  authButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    lineHeight: 24,
   },
 });

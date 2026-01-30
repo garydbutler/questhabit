@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import { Colors, Radius, Spacing } from '../../constants/design';
 
 interface ButtonProps {
   title: string;
@@ -55,7 +56,7 @@ export function Button({
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#6366F1'} />
+        <ActivityIndicator color={variant === 'primary' ? Colors.white : Colors.accent.primary} />
       ) : (
         <>
           {icon}
@@ -71,34 +72,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
-    gap: 8,
+    borderRadius: Radius.md,
+    gap: Spacing.xs,
   },
   primary: {
-    backgroundColor: '#6366F1',
+    backgroundColor: Colors.accent.primary,
   },
   secondary: {
-    backgroundColor: '#252525',
+    backgroundColor: Colors.bg.subtle,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
   },
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#6366F1',
+    borderWidth: 1.5,
+    borderColor: Colors.accent.primary,
   },
   ghost: {
     backgroundColor: 'transparent',
   },
   size_sm: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
   },
   size_md: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
   },
   size_lg: {
-    paddingHorizontal: 28,
-    paddingVertical: 16,
+    paddingHorizontal: Spacing['2xl'],
+    paddingVertical: Spacing.md,
   },
   disabled: {
     opacity: 0.5,
@@ -107,16 +110,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   text_primary: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   text_secondary: {
-    color: '#FFFFFF',
+    color: Colors.text.primary,
   },
   text_outline: {
-    color: '#6366F1',
+    color: Colors.accent.primary,
   },
   text_ghost: {
-    color: '#6366F1',
+    color: Colors.accent.primary,
   },
   text_sm: {
     fontSize: 14,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { ProgressBar } from '../ui/ProgressBar';
+import { ProgressRing } from '../ui/ProgressRing';
+import { Colors, Typography, Spacing, Radius } from '../../constants/design';
 
 interface DailyProgressProps {
   completed: number;
@@ -9,60 +10,69 @@ interface DailyProgressProps {
 
 export function DailyProgress({ completed, total }: DailyProgressProps) {
   const progress = total > 0 ? completed / total : 0;
-  const percentage = Math.round(progress * 100);
+  const isComplete = progress >= 1;
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Today's Progress</Text>
-        <Text style={styles.count}>
-          {completed}/{total} habits
-        </Text>
-      </View>
-      
-      <ProgressBar
+      <ProgressRing
         progress={progress}
-        color={progress === 1 ? '#22C55E' : '#6366F1'}
-        height={12}
-        style={styles.progressBar}
+        size={100}
+        strokeWidth={7}
+        label={`${completed}/${total}`}
+        sublabel="quests"
       />
-      
-      <Text style={styles.percentage}>
-        {percentage}% {progress === 1 && '🎉'}
-      </Text>
+      <View style={styles.info}>
+        <Text style={styles.title}>Today's Progress</Text>
+        <Text style={styles.subtitle}>
+          {total === 0
+            ? 'No quests scheduled'
+            : isComplete
+            ? 'All quests complete!'
+            : `${total - completed} remaining`}
+        </Text>
+        {isComplete && total > 0 && (
+          <View style={styles.completeBadge}>
+            <Text style={styles.completeText}>Perfect Day</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+    gap: Spacing.lg,
+  },
+  info: {
+    flex: 1,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    ...Typography.h3,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xxs,
   },
-  count: {
-    fontSize: 14,
-    color: '#A1A1A1',
+  subtitle: {
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
-  progressBar: {
-    marginBottom: 8,
+  completeBadge: {
+    marginTop: Spacing.xs,
+    backgroundColor: Colors.semantic.successMuted,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+    alignSelf: 'flex-start',
   },
-  percentage: {
-    fontSize: 14,
-    color: '#6366F1',
-    fontWeight: '600',
-    textAlign: 'right',
+  completeText: {
+    ...Typography.captionMedium,
+    color: Colors.semantic.success,
   },
 });

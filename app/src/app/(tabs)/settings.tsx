@@ -13,6 +13,10 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../stores/authStore';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { IconBadge } from '../../components/ui/IconBadge';
+import { GradientCard } from '../../components/ui/GradientCard';
+import { SectionHeader } from '../../components/ui/SectionHeader';
+import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/design';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -55,7 +59,7 @@ export default function SettingsScreen() {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      '⚠️ Delete Account',
+      'Delete Account',
       'This action is permanent and cannot be undone. All your habits, streaks, achievements, and progress will be permanently deleted.',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -71,7 +75,7 @@ export default function SettingsScreen() {
   };
 
   const handleRateApp = () => {
-    Alert.alert('Thank You! ⭐', 'Thanks for wanting to rate QuestHabit! App Store rating will be available once the app is published.');
+    Alert.alert('Thank You!', 'Thanks for wanting to rate QuestHabit! App Store rating will be available once the app is published.');
   };
 
   const handlePrivacyPolicy = () => {
@@ -89,6 +93,9 @@ export default function SettingsScreen() {
   if (!user) {
     return (
       <View style={styles.authContainer}>
+        <View style={styles.authIconWrap}>
+          <Text style={styles.authIconText}>{Icons.settings}</Text>
+        </View>
         <Text style={styles.authTitle}>Settings</Text>
         <Text style={styles.authSubtitle}>Sign in to manage your settings</Text>
         <Button
@@ -104,7 +111,7 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Profile Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Profile</Text>
+        <SectionHeader title="Profile" />
         <Card>
           <TouchableOpacity style={styles.profileRow} onPress={() => router.push('/(tabs)/profile')}>
             <View style={styles.avatar}>
@@ -116,7 +123,7 @@ export default function SettingsScreen() {
               <Text style={styles.profileName}>{user.displayName || 'Hero'}</Text>
               <Text style={styles.profileEmail}>{user.email}</Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <Text style={styles.chevron}>{Icons.chevronRight}</Text>
           </TouchableOpacity>
         </Card>
       </View>
@@ -125,30 +132,31 @@ export default function SettingsScreen() {
       {!user.isPro && (
         <View style={styles.section}>
           <TouchableOpacity
-            style={styles.proBanner}
-            onPress={() => router.push('/pro')}
             activeOpacity={0.8}
+            onPress={() => router.push('/pro')}
           >
-            <View style={styles.proBannerContent}>
-              <Text style={styles.proBannerIcon}>👑</Text>
-              <View style={styles.proBannerText}>
-                <Text style={styles.proBannerTitle}>Upgrade to Pro</Text>
-                <Text style={styles.proBannerSubtitle}>
-                  Unlimited habits, AI coach & more
-                </Text>
+            <GradientCard variant="gold">
+              <View style={styles.proBannerContent}>
+                <IconBadge symbol={Icons.crown} color={Colors.pro.primary} size="md" />
+                <View style={styles.proBannerText}>
+                  <Text style={styles.proBannerTitle}>Upgrade to Pro</Text>
+                  <Text style={styles.proBannerSubtitle}>
+                    Unlimited habits, AI coach & more
+                  </Text>
+                </View>
+                <Text style={[styles.chevron, { color: Colors.pro.primary }]}>{Icons.chevronRight}</Text>
               </View>
-            </View>
-            <Text style={styles.proBannerChevron}>›</Text>
+            </GradientCard>
           </TouchableOpacity>
         </View>
       )}
 
       {/* App Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>App Settings</Text>
+        <SectionHeader title="App Settings" />
         <Card>
           <View style={[styles.settingsItem, styles.settingsItemBorder]}>
-            <Text style={styles.settingsIcon}>🔔</Text>
+            <IconBadge symbol={'\u266A'} color={Colors.accent.primary} size="sm" />
             <View style={styles.settingsContent}>
               <Text style={styles.settingsTitle}>Notifications</Text>
               <Text style={styles.settingsSubtitle}>Habit reminders</Text>
@@ -156,12 +164,14 @@ export default function SettingsScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: '#252525', true: '#6366F1' }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: Colors.border.primary, true: Colors.accent.muted }}
+              thumbColor={notificationsEnabled ? Colors.accent.primary : Colors.text.muted}
+              ios_backgroundColor={Colors.border.primary}
             />
           </View>
           <SettingsItem
-            icon="⏰"
+            symbol={'\u23F0'}
+            symbolColor={Colors.semantic.warning}
             title="Default Reminder"
             subtitle={dailyReminderTime}
             onPress={() => {
@@ -169,7 +179,8 @@ export default function SettingsScreen() {
             }}
           />
           <SettingsItem
-            icon="🎨"
+            symbol={'\u25CF'}
+            symbolColor={Colors.accent.primary}
             title="Theme"
             subtitle="Dark (default)"
             onPress={() => {
@@ -177,7 +188,8 @@ export default function SettingsScreen() {
             }}
           />
           <SettingsItem
-            icon="🌍"
+            symbol={'\u2609'}
+            symbolColor={Colors.semantic.info}
             title="Timezone"
             subtitle={user.timezone}
             isLast
@@ -190,16 +202,18 @@ export default function SettingsScreen() {
 
       {/* Data */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Data</Text>
+        <SectionHeader title="Data" />
         <Card>
           <SettingsItem
-            icon="📤"
+            symbol={'\u2191'}
+            symbolColor={Colors.semantic.success}
             title="Export Data"
             subtitle="Download your habits & progress"
             onPress={handleExportData}
           />
           <SettingsItem
-            icon="🗑️"
+            symbol={'\u2716'}
+            symbolColor={Colors.semantic.error}
             title="Delete Account"
             subtitle="Permanently delete all data"
             isLast
@@ -211,26 +225,30 @@ export default function SettingsScreen() {
 
       {/* About */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About</Text>
+        <SectionHeader title="About" />
         <Card>
           <SettingsItem
-            icon="⭐"
+            symbol={'\u2605'}
+            symbolColor={Colors.xp.primary}
             title="Rate QuestHabit"
             subtitle="Help us with a review"
             onPress={handleRateApp}
           />
           <SettingsItem
-            icon="🔒"
+            symbol={'\u25A0'}
+            symbolColor={Colors.text.tertiary}
             title="Privacy Policy"
             onPress={handlePrivacyPolicy}
           />
           <SettingsItem
-            icon="📄"
+            symbol={'\u25A1'}
+            symbolColor={Colors.text.tertiary}
             title="Terms of Service"
             onPress={handleTerms}
           />
           <SettingsItem
-            icon="💬"
+            symbol={'\u2709'}
+            symbolColor={Colors.accent.primary}
             title="Send Feedback"
             subtitle="We'd love to hear from you"
             onPress={() => {
@@ -239,8 +257,8 @@ export default function SettingsScreen() {
               });
             }}
           />
-          <View style={[styles.settingsItem]}>
-            <Text style={styles.settingsIcon}>ℹ️</Text>
+          <View style={styles.settingsItem}>
+            <IconBadge symbol={Icons.info} color={Colors.text.muted} size="sm" />
             <View style={styles.settingsContent}>
               <Text style={styles.settingsTitle}>Version</Text>
               <Text style={styles.settingsSubtitle}>1.0.0</Text>
@@ -251,29 +269,27 @@ export default function SettingsScreen() {
 
       {/* Sign Out */}
       <View style={styles.section}>
-        <Button
-          title="Sign Out"
-          variant="ghost"
-          onPress={handleSignOut}
-          textStyle={{ color: '#EF4444' }}
-          style={styles.signOutButton}
-        />
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: Spacing['3xl'] }} />
     </ScrollView>
   );
 }
 
 function SettingsItem({
-  icon,
+  symbol,
+  symbolColor,
   title,
   subtitle,
   isLast,
   destructive,
   onPress,
 }: {
-  icon: string;
+  symbol: string;
+  symbolColor: string;
   title: string;
   subtitle?: string;
   isLast?: boolean;
@@ -286,7 +302,11 @@ function SettingsItem({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <Text style={styles.settingsIcon}>{icon}</Text>
+      <IconBadge
+        symbol={symbol}
+        color={destructive ? Colors.semantic.error : symbolColor}
+        size="sm"
+      />
       <View style={styles.settingsContent}>
         <Text style={[styles.settingsTitle, destructive && styles.destructiveText]}>
           {title}
@@ -297,7 +317,7 @@ function SettingsItem({
           </Text>
         )}
       </View>
-      <Text style={styles.chevron}>›</Text>
+      <Text style={styles.chevron}>{Icons.chevronRight}</Text>
     </TouchableOpacity>
   );
 }
@@ -305,20 +325,14 @@ function SettingsItem({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: Colors.bg.primary,
   },
   content: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: Spacing.lg,
+    paddingBottom: Spacing['3xl'],
   },
   section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    marginBottom: Spacing.xl,
   },
   profileRow: {
     flexDirection: 'row',
@@ -328,7 +342,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#6366F1',
+    backgroundColor: Colors.accent.muted,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -336,116 +350,112 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: Colors.accent.primary,
   },
   profileInfo: {
     flex: 1,
   },
   profileName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    ...Typography.bodySemibold,
+    color: Colors.text.primary,
     marginBottom: 2,
   },
   profileEmail: {
-    fontSize: 13,
-    color: '#A1A1A1',
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
   chevron: {
-    fontSize: 24,
-    color: '#6B6B6B',
-  },
-  proBanner: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#6366F1',
+    fontSize: 20,
+    color: Colors.text.muted,
   },
   proBannerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-  },
-  proBannerIcon: {
-    fontSize: 28,
-    marginRight: 14,
+    gap: Spacing.sm,
   },
   proBannerText: {
     flex: 1,
   },
   proBannerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...Typography.bodySemibold,
+    color: Colors.text.primary,
     marginBottom: 2,
   },
   proBannerSubtitle: {
-    fontSize: 13,
-    color: '#A1A1A1',
-  },
-  proBannerChevron: {
-    fontSize: 24,
-    color: '#6366F1',
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
   settingsItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
+    gap: Spacing.sm,
   },
   settingsItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: '#252525',
-  },
-  settingsIcon: {
-    fontSize: 20,
-    marginRight: 14,
+    borderBottomColor: Colors.border.subtle,
   },
   settingsContent: {
     flex: 1,
   },
   settingsTitle: {
-    fontSize: 16,
-    color: '#FFFFFF',
+    ...Typography.bodyMedium,
+    color: Colors.text.primary,
   },
   settingsSubtitle: {
-    fontSize: 12,
-    color: '#6B6B6B',
-    marginTop: 2,
+    ...Typography.caption,
+    color: Colors.text.tertiary,
+    marginTop: 1,
   },
   destructiveText: {
-    color: '#EF4444',
+    color: Colors.semantic.error,
   },
   destructiveSubtext: {
-    color: '#EF4444',
+    color: Colors.semantic.error,
     opacity: 0.7,
   },
   signOutButton: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    paddingVertical: 16,
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.semantic.errorMuted,
+    alignItems: 'center',
+  },
+  signOutText: {
+    color: Colors.semantic.error,
+    ...Typography.bodySemibold,
   },
   authContainer: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
-    padding: 40,
+    backgroundColor: Colors.bg.primary,
+    padding: Spacing['3xl'],
     alignItems: 'center',
     justifyContent: 'center',
   },
-  authTitle: {
+  authIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: Colors.accent.ghost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+  },
+  authIconText: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    color: Colors.accent.primary,
+  },
+  authTitle: {
+    ...Typography.h1,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
   },
   authSubtitle: {
-    fontSize: 16,
-    color: '#A1A1A1',
+    ...Typography.body,
+    color: Colors.text.tertiary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: Spacing['2xl'],
   },
   authButton: {
     width: '100%',

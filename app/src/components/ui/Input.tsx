@@ -7,6 +7,7 @@ import {
   TextInputProps,
   ViewStyle,
 } from 'react-native';
+import { Colors, Typography, Radius, Spacing } from '../../constants/design';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -29,7 +30,7 @@ export function Input({
           error && styles.inputError,
           props.multiline && styles.multiline,
         ]}
-        placeholderTextColor="#6B6B6B"
+        placeholderTextColor={Colors.text.muted}
         {...props}
       />
       {error && <Text style={styles.error}>{error}</Text>}
@@ -39,26 +40,27 @@ export function Input({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   label: {
-    color: '#A1A1A1',
-    fontSize: 14,
-    marginBottom: 8,
-    fontWeight: '500',
+    ...Typography.captionMedium,
+    color: Colors.text.tertiary,
+    marginBottom: Spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: Colors.bg.input,
     borderWidth: 1,
-    borderColor: '#252525',
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderColor: Colors.border.primary,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
     paddingVertical: 14,
-    color: '#FFFFFF',
+    color: Colors.text.primary,
     fontSize: 16,
   },
   inputError: {
-    borderColor: '#EF4444',
+    borderColor: Colors.semantic.error,
   },
   multiline: {
     minHeight: 100,
@@ -66,8 +68,8 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   error: {
-    color: '#EF4444',
+    color: Colors.semantic.error,
     fontSize: 12,
-    marginTop: 6,
+    marginTop: Spacing.xxs,
   },
 });
