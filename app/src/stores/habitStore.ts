@@ -5,6 +5,9 @@ import { calculateXP, checkLevelUp } from '../lib/xp';
 import { useAuthStore } from './authStore';
 import { format, isToday, parseISO, startOfDay } from 'date-fns';
 
+// Lazy import to avoid circular dependency
+const getAchievementStore = () => require('./achievementStore').useAchievementStore;
+
 interface HabitState {
   habits: HabitWithStreak[];
   completions: Completion[];
@@ -327,6 +330,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
             : h
         ),
       }));
+      
+      // Check for new achievements
+      try {
+        await get().fetchTodayCompletions();
+        await getAchievementStore().getState().checkAndUnlock();
+      } catch (achievementError) {
+        // Non-blocking — don't fail the completion
+        console.error('Achievement check error:', achievementError);
+      }
       
       return { success: true, xpEarned: totalXp, leveledUp, newLevel };
     } catch (error: any) {
