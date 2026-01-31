@@ -96,6 +96,12 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="achievements"
+          options={{
+            title: 'Achievements',
+          }}
+        />
+        <Stack.Screen
           name="pro"
           options={{
             title: 'QuestHabit Pro',
