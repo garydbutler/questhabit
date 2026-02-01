@@ -184,6 +184,13 @@ export default function ProfileScreen() {
         <SectionHeader title="Quick Links" />
         <Card>
           <QuickLink
+            icon={'\u2197'}
+            iconColor={Colors.accent.primary}
+            title="Share Progress"
+            subtitle="Share your streak cards"
+            onPress={() => router.push('/share-preview' as any)}
+          />
+          <QuickLink
             icon={Icons.settings}
             iconColor={Colors.text.tertiary}
             title="Settings"

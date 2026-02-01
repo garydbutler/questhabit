@@ -43,19 +43,7 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = () => {
-    Alert.alert(
-      'Export Data',
-      'Your data export will be prepared and sent to your email. This may take a few minutes.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Export',
-          onPress: () => {
-            Alert.alert('Coming Soon', 'Data export will be available in a future update.');
-          },
-        },
-      ]
-    );
+    router.push('/data-export' as any);
   };
 
   const handleDeleteAccount = () => {
