@@ -4,8 +4,10 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { format, subDays } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 import { useHabitStore } from '../../stores/habitStore';
@@ -21,6 +23,7 @@ import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/desi
 import { CATEGORY_COLORS } from '../../constants';
 
 export default function StatsScreen() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { habits } = useHabitStore();
   const [heatmapData, setHeatmapData] = useState<Array<{ date: string; count: number; total: number }>>([]);
@@ -79,6 +82,26 @@ export default function StatsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Share Progress */}
+      <View style={styles.shareRow}>
+        <TouchableOpacity
+          style={styles.shareButton}
+          onPress={() => router.push('/share-preview?type=weekly' as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.shareIcon}>{'\u2197'}</Text>
+          <Text style={styles.shareText}>Share Progress</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.exportButton}
+          onPress={() => router.push('/data-export' as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.exportIcon}>{'\u2191'}</Text>
+          <Text style={styles.exportText}>Export</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Level Card */}
       <View style={styles.section}>
         <SectionHeader title="Your Progress" />
@@ -192,6 +215,51 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: Spacing.xl,
+  },
+  shareRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  shareButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.accent.muted,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.md,
+    gap: 6,
+  },
+  shareIcon: {
+    fontSize: 16,
+    color: Colors.accent.primary,
+    fontWeight: '600',
+  },
+  shareText: {
+    ...Typography.captionMedium,
+    color: Colors.accent.primary,
+  },
+  exportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.bg.elevated,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+    gap: 6,
+  },
+  exportIcon: {
+    fontSize: 16,
+    color: Colors.text.tertiary,
+    fontWeight: '600',
+  },
+  exportText: {
+    ...Typography.captionMedium,
+    color: Colors.text.tertiary,
   },
   grid: {
     flexDirection: 'row',
