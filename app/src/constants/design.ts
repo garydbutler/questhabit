@@ -342,6 +342,13 @@ export const Icons = {
   ring: '\u25CB',          // ○ — ring
 } as const;
 
+// Quest tier icon map
+export const QuestTierIcons: Record<string, { symbol: string; color: string; bgColor: string }> = {
+  daily:     { symbol: '\u25C9', color: '#06B6D4', bgColor: 'rgba(6, 182, 212, 0.10)' },     // ◉
+  weekly:    { symbol: '\u2605', color: '#8B5CF6', bgColor: 'rgba(139, 92, 246, 0.10)' },    // ★
+  legendary: { symbol: '\u2666', color: '#F59E0B', bgColor: 'rgba(245, 158, 11, 0.08)' },    // ♦
+};
+
 // Achievement icon map — replacing emoji
 export const AchievementIcons: Record<string, { symbol: string; color: string }> = {
   first_step:        { symbol: '\u25B6', color: '#06B6D4' },  // ▶
