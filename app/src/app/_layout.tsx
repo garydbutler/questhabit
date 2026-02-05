@@ -6,6 +6,7 @@ import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../stores/authStore';
 import { configureNotifications } from '../lib/notifications';
+import { useSubscriptionLinks } from '../hooks/useSubscriptionLinks';
 import { Colors } from '../constants/design';
 
 // Configure notification behavior on import (before component mounts)
@@ -16,6 +17,9 @@ export default function RootLayout() {
   const router = useRouter();
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
+
+  // Handle subscription deep links and app state changes
+  useSubscriptionLinks();
 
   useEffect(() => {
     initialize();
