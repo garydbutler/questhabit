@@ -6,10 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../stores/authStore';
+import { useSubscriptionStore } from '../stores/subscriptionStore';
+import { getSubscriptionStatusText } from '../lib/stripe';
 import { Button } from '../components/ui/Button';
 import { GradientButton } from '../components/ui/GradientButton';
 import { GradientCard } from '../components/ui/GradientCard';
@@ -43,26 +46,72 @@ const PRO_FEATURES = [
 export default function ProScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { purchasePro, manageSubscription, isLoading } = useSubscriptionStore();
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('yearly');
 
-  const handlePurchase = () => {
-    const planName = selectedPlan === 'monthly' ? '$4.99/month' : '$39.99/year';
-    Alert.alert(
-      'Coming Soon!',
-      `In-app purchase for ${planName} will be available when the app launches on the App Store. Thanks for your interest in QuestHabit Pro!`,
-      [{ text: 'Got it!' }]
-    );
+  const handlePurchase = async () => {
+    if (!user) {
+      Alert.alert(
+        'Sign In Required',
+        'Please sign in to purchase QuestHabit Pro',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign In', onPress: () => router.push('/(auth)/login') },
+        ]
+      );
+      return;
+    }
+
+    const result = await purchasePro(selectedPlan);
+    
+    if (!result.success) {
+      Alert.alert(
+        'Error',
+        result.error || 'Failed to start checkout. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+    // If successful, checkout opened in browser
+    // User will return to app after completing/canceling
   };
 
-  const handleRestorePurchases = () => {
-    Alert.alert(
-      'Restore Purchases',
-      'Purchase restoration will be available when in-app purchases are enabled.',
-      [{ text: 'OK' }]
-    );
+  const handleManageSubscription = async () => {
+    const result = await manageSubscription();
+    
+    if (!result.success) {
+      Alert.alert(
+        'Error',
+        result.error || 'Failed to open subscription management.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
+  const handleRestorePurchases = async () => {
+    // For Stripe, we just refresh the user's subscription status
+    // The webhook should have already updated their status
+    Alert.alert(
+      'Checking Subscription',
+      'Verifying your subscription status...',
+    );
+    
+    await useAuthStore.getState().initialize();
+    
+    if (useAuthStore.getState().user?.isPro) {
+      Alert.alert('Success', 'Your Pro subscription has been restored!');
+    } else {
+      Alert.alert(
+        'No Subscription Found',
+        'If you recently purchased Pro, please allow a few moments and try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Active Pro user view
   if (user?.isPro) {
+    const statusText = getSubscriptionStatusText(user.stripeSubscriptionStatus);
+    
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.activeProContainer}>
@@ -78,12 +127,22 @@ export default function ProScreen() {
             <Text style={styles.activeProSubtitle}>
               Thank you for supporting QuestHabit
             </Text>
+            {user.stripeSubscriptionStatus && (
+              <ChipTag 
+                label={statusText} 
+                color={user.stripeSubscriptionStatus === 'active' ? Colors.semantic.success : Colors.pro.primary}
+                variant="filled"
+                style={{ marginTop: Spacing.sm }}
+              />
+            )}
           </LinearGradient>
 
           {user.proExpiresAt && (
             <GradientCard variant="gold" style={styles.expiryCard}>
               <View style={styles.expiryInner}>
-                <Text style={styles.expiryLabel}>SUBSCRIPTION RENEWS</Text>
+                <Text style={styles.expiryLabel}>
+                  {user.stripeSubscriptionStatus === 'trialing' ? 'TRIAL ENDS' : 'SUBSCRIPTION RENEWS'}
+                </Text>
                 <Text style={styles.expiryDate}>
                   {new Date(user.proExpiresAt).toLocaleDateString('en-US', {
                     month: 'long',
@@ -94,6 +153,24 @@ export default function ProScreen() {
               </View>
             </GradientCard>
           )}
+
+          {/* Manage Subscription Button */}
+          <TouchableOpacity
+            style={styles.manageButton}
+            onPress={handleManageSubscription}
+            disabled={isLoading}
+            activeOpacity={0.7}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={Colors.accent.primary} />
+            ) : (
+              <>
+                <IconBadge symbol={Icons.settings} color={Colors.accent.primary} size="sm" />
+                <Text style={styles.manageButtonText}>Manage Subscription</Text>
+                <Text style={styles.chevron}>{Icons.chevronRight}</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
           <View style={styles.activeFeaturesList}>
             <Text style={styles.activeFeaturesTitle}>Your Pro Benefits</Text>
@@ -107,6 +184,16 @@ export default function ProScreen() {
             ))}
           </View>
 
+          <View style={styles.freezeStatus}>
+            <IconBadge symbol={Icons.shield} color={Colors.semantic.info} size="md" />
+            <View style={styles.freezeTextContainer}>
+              <Text style={styles.freezeTitle}>Streak Freezes</Text>
+              <Text style={styles.freezeCount}>
+                {user.streakFreezesRemaining} of 3 remaining this month
+              </Text>
+            </View>
+          </View>
+
           <Button
             title={`${Icons.back} Back`}
             variant="ghost"
@@ -118,6 +205,7 @@ export default function ProScreen() {
     );
   }
 
+  // Free user - show upgrade UI
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Hero Section */}
@@ -158,8 +246,12 @@ export default function ProScreen() {
               </View>
             ))}
           </View>
-          <View style={styles.currentPlanDivider} />
-          <Text style={styles.currentPlanLabel}>Current Plan</Text>
+          {!user?.isPro && (
+            <>
+              <View style={styles.currentPlanDivider} />
+              <Text style={styles.currentPlanLabel}>Current Plan</Text>
+            </>
+          )}
         </GradientCard>
 
         {/* Pro Column */}
@@ -208,7 +300,7 @@ export default function ProScreen() {
             </View>
             <View>
               <Text style={styles.planOptionTitle}>Yearly</Text>
-              <Text style={styles.planOptionSubtitle}>$39.99/year · $3.33/mo</Text>
+              <Text style={styles.planOptionSubtitle}>$39.99/year - $3.33/mo</Text>
             </View>
           </View>
           <ChipTag label="SAVE 33%" color={Colors.semantic.success} variant="filled" />
@@ -237,14 +329,16 @@ export default function ProScreen() {
       {/* CTA */}
       <View style={styles.ctaSection}>
         <GradientButton
-          title={selectedPlan === 'yearly' ? 'Start Pro \u2014 $39.99/year' : 'Start Pro \u2014 $4.99/month'}
+          title={selectedPlan === 'yearly' ? 'Start Pro - $39.99/year' : 'Start Pro - $4.99/month'}
           onPress={handlePurchase}
           variant="gold"
           size="lg"
           fullWidth
+          loading={isLoading}
+          disabled={isLoading}
         />
         <Text style={styles.ctaSubtext}>
-          Cancel anytime {Icons.dot} 7-day free trial
+          Cancel anytime - 7-day free trial
         </Text>
 
         <TouchableOpacity onPress={handleRestorePurchases} style={styles.restoreButton}>
@@ -263,7 +357,7 @@ export default function ProScreen() {
           <Text style={styles.socialProofText}>
             "QuestHabit Pro helped me build 12 habits and maintain a 90-day streak. The AI coach is a game changer!"
           </Text>
-          <Text style={styles.socialProofAuthor}>\u2014 Alex, Level 10 Hero</Text>
+          <Text style={styles.socialProofAuthor}>- Alex, Level 10 Hero</Text>
         </View>
       </GradientCard>
 
@@ -552,7 +646,7 @@ const styles = StyleSheet.create({
   },
   expiryCard: {
     width: '100%',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   expiryInner: {
     alignItems: 'center',
@@ -566,6 +660,28 @@ const styles = StyleSheet.create({
     ...Typography.bodySemibold,
     color: Colors.text.primary,
   },
+  manageButton: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+    gap: Spacing.sm,
+  },
+  manageButtonText: {
+    ...Typography.bodySemibold,
+    color: Colors.accent.primary,
+    flex: 1,
+  },
+  chevron: {
+    fontSize: 18,
+    color: Colors.accent.primary,
+  },
   activeFeaturesList: {
     width: '100%',
     backgroundColor: Colors.bg.elevated,
@@ -573,6 +689,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderWidth: 1,
     borderColor: Colors.border.primary,
+    marginBottom: Spacing.lg,
   },
   activeFeaturesTitle: {
     ...Typography.h3,
@@ -603,5 +720,28 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.text.primary,
     flex: 1,
+  },
+  freezeStatus: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+    gap: Spacing.sm,
+  },
+  freezeTextContainer: {
+    flex: 1,
+  },
+  freezeTitle: {
+    ...Typography.bodySemibold,
+    color: Colors.text.primary,
+    marginBottom: 2,
+  },
+  freezeCount: {
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
 });

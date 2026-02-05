@@ -52,6 +52,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               timezone: profile.timezone,
               createdAt: profile.created_at,
               updatedAt: profile.updated_at,
+              stripeCustomerId: profile.stripe_customer_id,
+              stripeSubscriptionId: profile.stripe_subscription_id,
+              stripeSubscriptionStatus: profile.stripe_subscription_status,
             },
           });
         }
@@ -97,6 +100,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               timezone: profile.timezone,
               createdAt: profile.created_at,
               updatedAt: profile.updated_at,
+              stripeCustomerId: profile.stripe_customer_id,
+              stripeSubscriptionId: profile.stripe_subscription_id,
+              stripeSubscriptionStatus: profile.stripe_subscription_status,
             },
             isLoading: false,
           });
