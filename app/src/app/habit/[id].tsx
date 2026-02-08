@@ -298,6 +298,18 @@ export default function EditHabitScreen() {
         </View>
       </View>
 
+      {/* Share Streak */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={styles.shareStreakButton}
+          onPress={() => router.push(`/share-preview?type=streak&habitId=${habit.id}` as any)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.shareStreakIcon}>{'\u2197'}</Text>
+          <Text style={styles.shareStreakText}>Share Streak Card</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Actions */}
       <View style={styles.actions}>
         <GradientButton
@@ -457,6 +469,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: Spacing.xxs,
     fontWeight: '600',
+  },
+  shareStreakButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.accent.ghost,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.md,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.accent.primary + '30',
+  },
+  shareStreakIcon: {
+    fontSize: 18,
+    color: Colors.accent.primary,
+    fontWeight: '600',
+  },
+  shareStreakText: {
+    ...Typography.bodySemibold,
+    color: Colors.accent.primary,
   },
   actions: {
     marginTop: Spacing.sm,
