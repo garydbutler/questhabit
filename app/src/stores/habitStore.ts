@@ -33,28 +33,29 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   error: null,
   
   fetchHabits: async () => {
-    const user = useAuthStore.getState().user;
-    if (!user) return;
-    
+    // Use Supabase session directly to ensure consistency with RLS
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
     set({ isLoading: true });
-    
+
     try {
       // Fetch habits with streaks
       const { data: habits, error: habitsError } = await supabase
         .from('habits')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .eq('is_archived', false)
         .order('created_at', { ascending: true });
-      
+
       if (habitsError) throw habitsError;
-      
+
       // Fetch streaks
       const { data: streaks, error: streaksError } = await supabase
         .from('streaks')
         .select('*')
-        .eq('user_id', user.id);
-      
+        .eq('user_id', session.user.id);
+
       if (streaksError) throw streaksError;
       
       // Map streaks to habits
@@ -77,7 +78,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const { data: todayCompletions } = await supabase
         .from('completions')
         .select('habit_id')
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .eq('completed_date', today);
       
       const completedTodaySet = new Set(todayCompletions?.map((c: any) => c.habit_id) || []);
@@ -108,15 +109,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
   
   fetchTodayCompletions: async () => {
-    const user = useAuthStore.getState().user;
-    if (!user) return;
-    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
     try {
       const today = format(new Date(), 'yyyy-MM-dd');
       const { data, error } = await supabase
         .from('completions')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .eq('completed_date', today);
       
       if (error) throw error;
@@ -139,16 +140,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
   
   createHabit: async (input) => {
-    const user = useAuthStore.getState().user;
-    if (!user) return { success: false, error: 'Not authenticated' };
-    
+    // Use Supabase session directly to ensure auth.uid() matches
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return { success: false, error: 'Not authenticated' };
+
     set({ isLoading: true });
-    
+
     try {
       const { data, error } = await supabase
         .from('habits')
         .insert({
-          user_id: user.id,
+          user_id: session.user.id,
           name: input.name,
           description: input.description,
           category: input.category,
@@ -168,15 +170,42 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         .from('streaks')
         .insert({
           habit_id: data.id,
-          user_id: user.id,
+          user_id: session.user.id,
           current_streak: 0,
           best_streak: 0,
         });
-      
-      // Refresh habits
-      await get().fetchHabits();
-      
-      set({ isLoading: false });
+
+      // Add habit to local state immediately (prevents race conditions)
+      const newHabit: HabitWithStreak = {
+        id: data.id,
+        userId: data.user_id,
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        frequency: data.frequency,
+        difficulty: data.difficulty,
+        icon: data.icon,
+        color: data.color,
+        reminderTime: data.reminder_time,
+        isArchived: data.is_archived,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        streak: {
+          id: '',
+          habitId: data.id,
+          userId: session.user.id,
+          currentStreak: 0,
+          bestStreak: 0,
+          updatedAt: new Date().toISOString(),
+        },
+        completedToday: false,
+      };
+
+      set((state) => ({
+        habits: [...state.habits, newHabit],
+        isLoading: false,
+      }));
+
       return { success: true, habit: data };
     } catch (error: any) {
       console.error('Create habit error:', error);
@@ -186,8 +215,8 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
   
   updateHabit: async (id, input) => {
-    const user = useAuthStore.getState().user;
-    if (!user) return { success: false, error: 'Not authenticated' };
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return { success: false, error: 'Not authenticated' };
     
     set({ isLoading: true });
     
@@ -207,10 +236,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
-        .eq('user_id', user.id);
-      
+        .eq('user_id', session.user.id);
+
       if (error) throw error;
-      
+
       await get().fetchHabits();
       set({ isLoading: false });
       return { success: true };
@@ -220,17 +249,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       return { success: false, error: error.message };
     }
   },
-  
+
   deleteHabit: async (id) => {
-    const user = useAuthStore.getState().user;
-    if (!user) return { success: false, error: 'Not authenticated' };
-    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return { success: false, error: 'Not authenticated' };
+
     try {
       const { error } = await supabase
         .from('habits')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', session.user.id);
       
       if (error) throw error;
       
@@ -243,32 +272,35 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
   
   completeHabit: async (habitId) => {
-    const user = useAuthStore.getState().user;
-    if (!user) return { success: false, error: 'Not authenticated' };
-    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return { success: false, error: 'Not authenticated' };
+
     const { habits } = get();
     const habit = habits.find(h => h.id === habitId);
     if (!habit) return { success: false, error: 'Habit not found' };
-    
+
+    // Get current user profile for XP calculations
+    const user = useAuthStore.getState().user;
+
     try {
       const now = new Date();
       const today = format(now, 'yyyy-MM-dd');
       const currentHour = now.getHours();
       const currentStreak = habit.streak?.currentStreak || 0;
-      
+
       // Calculate XP
       const { totalXp, streakBonus, timeBonus } = calculateXP(
         habit.difficulty,
         currentStreak,
         currentHour
       );
-      
+
       // Insert completion
       const { error: completionError } = await supabase
         .from('completions')
         .insert({
           habit_id: habitId,
-          user_id: user.id,
+          user_id: session.user.id,
           completed_date: today,
           xp_earned: totalXp,
           streak_bonus: streakBonus,
@@ -297,10 +329,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         .eq('habit_id', habitId);
       
       // Update user XP
-      const previousXP = user.totalXp;
+      const previousXP = user?.totalXp || 0;
       const newXP = previousXP + totalXp;
       const { leveledUp, newLevel } = checkLevelUp(previousXP, newXP);
-      
+
       await supabase
         .from('profiles')
         .update({
@@ -308,7 +340,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
           level: newLevel,
           updated_at: now.toISOString(),
         })
-        .eq('id', user.id);
+        .eq('id', session.user.id);
       
       // Update local state
       useAuthStore.getState().updateUser({ totalXp: newXP, level: newLevel });
@@ -348,12 +380,14 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
   
   uncompleteHabit: async (habitId) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return { success: false, error: 'Not authenticated' };
+
     const user = useAuthStore.getState().user;
-    if (!user) return { success: false, error: 'Not authenticated' };
-    
+
     try {
       const today = format(new Date(), 'yyyy-MM-dd');
-      
+
       // Get completion to know XP to remove
       const { data: completion } = await supabase
         .from('completions')
@@ -361,24 +395,24 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         .eq('habit_id', habitId)
         .eq('completed_date', today)
         .single();
-      
+
       if (!completion) return { success: false, error: 'Completion not found' };
-      
+
       // Delete completion
       const { error } = await supabase
         .from('completions')
         .delete()
         .eq('habit_id', habitId)
         .eq('completed_date', today);
-      
+
       if (error) throw error;
-      
+
       // Revert XP
-      const newXP = Math.max(0, user.totalXp - completion.xp_earned);
+      const newXP = Math.max(0, (user?.totalXp || 0) - completion.xp_earned);
       await supabase
         .from('profiles')
         .update({ total_xp: newXP })
-        .eq('id', user.id);
+        .eq('id', session.user.id);
       
       useAuthStore.getState().updateUser({ totalXp: newXP });
       

@@ -129,34 +129,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       
       if (data.user) {
-        // Create user profile
-        const { error: profileError } = await supabase
+        // Profile is created automatically by database trigger
+        // Fetch the created profile
+        const { data: profile } = await supabase
           .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: data.user.email,
-            level: 1,
-            total_xp: 0,
-            is_pro: false,
-            streak_freezes_remaining: 0,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          });
-        
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-        }
-        
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
         set({
           user: {
             id: data.user.id,
             email: data.user.email!,
-            level: 1,
-            totalXp: 0,
-            isPro: false,
-            streakFreezesRemaining: 0,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            displayName: profile?.display_name,
+            avatarUrl: profile?.avatar_url,
+            level: profile?.level ?? 1,
+            totalXp: profile?.total_xp ?? 0,
+            isPro: profile?.is_pro ?? false,
+            proExpiresAt: profile?.pro_expires_at,
+            streakFreezesRemaining: profile?.streak_freezes_remaining ?? 0,
+            timezone: profile?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+            createdAt: profile?.created_at ?? new Date().toISOString(),
+            updatedAt: profile?.updated_at ?? new Date().toISOString(),
           },
           isLoading: false,
         });
