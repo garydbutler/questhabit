@@ -6,7 +6,6 @@ import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../stores/authStore';
 import { configureNotifications } from '../lib/notifications';
-import { useSubscriptionLinks } from '../hooks/useSubscriptionLinks';
 import { Colors } from '../constants/design';
 
 // Configure notification behavior on import (before component mounts)
@@ -17,9 +16,6 @@ export default function RootLayout() {
   const router = useRouter();
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
-
-  // Handle subscription deep links and app state changes
-  useSubscriptionLinks();
 
   useEffect(() => {
     initialize();
@@ -43,12 +39,8 @@ export default function RootLayout() {
     });
 
     return () => {
-      if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      }
-      if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
-      }
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, []);
 
@@ -117,6 +109,20 @@ export default function RootLayout() {
           options={{
             title: 'QuestHabit Pro',
             presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="subscription-success"
+          options={{
+            headerShown: false,
+            animation: 'fade',
+          }}
+        />
+        <Stack.Screen
+          name="subscription-cancel"
+          options={{
+            headerShown: false,
+            animation: 'fade',
           }}
         />
       </Stack>

@@ -19,20 +19,20 @@ export function useSubscriptionLinks() {
     if (url.includes('subscription-success')) {
       // User completed checkout - refresh subscription status
       await initialize();
-      
+
       // Check if they're now Pro
       const updatedUser = useAuthStore.getState().user;
       if (updatedUser?.isPro) {
         Alert.alert(
           'Welcome to Pro!',
           'Your QuestHabit Pro subscription is now active. Enjoy unlimited habits, AI coaching, and more!',
-          [{ text: 'Awesome!', onPress: () => router.replace('/pro') }]
+          [{ text: 'Awesome!' }]
         );
       } else {
-        // Subscription might still be processing
+        // Subscription might still be processing (webhook hasn't fired yet)
         Alert.alert(
           'Processing...',
-          'Your subscription is being processed. It may take a moment to activate.',
+          'Your subscription is being processed. It may take a moment to activate. Pull down to refresh.',
           [{ text: 'OK' }]
         );
         // Try again in a few seconds

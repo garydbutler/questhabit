@@ -3,6 +3,7 @@
 
 import { supabase } from './supabase';
 import { Linking } from 'react-native';
+import * as ExpoLinking from 'expo-linking';
 
 // Stripe Price IDs - Configure these in Stripe Dashboard
 // These should be set via environment variables in production
@@ -36,12 +37,16 @@ export async function createCheckoutSession(
   try {
     const priceId = plan === 'monthly' ? STRIPE_PRICES.PRO_MONTHLY : STRIPE_PRICES.PRO_YEARLY;
 
+    // Use ExpoLinking to get correct URL scheme (works in Expo Go and standalone)
+    const successUrl = ExpoLinking.createURL('subscription-success');
+    const cancelUrl = ExpoLinking.createURL('subscription-cancel');
+
     const { data, error } = await supabase.functions.invoke('create-checkout-session', {
       body: {
         priceId,
         userId,
-        successUrl: 'questhabit://subscription-success',
-        cancelUrl: 'questhabit://subscription-cancel',
+        successUrl,
+        cancelUrl,
       },
     });
 
@@ -85,10 +90,13 @@ export async function openCheckout(userId: string, plan: PlanType): Promise<Chec
  */
 export async function createCustomerPortalSession(userId: string): Promise<PortalResult> {
   try {
+    // Use ExpoLinking to get correct URL scheme (works in Expo Go and standalone)
+    const returnUrl = ExpoLinking.createURL('profile');
+
     const { data, error } = await supabase.functions.invoke('customer-portal', {
       body: {
         userId,
-        returnUrl: 'questhabit://profile',
+        returnUrl,
       },
     });
 
