@@ -12,7 +12,21 @@ export interface User {
   timezone: string;
   createdAt: string;
   updatedAt: string;
+  // Stripe subscription fields
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripeSubscriptionStatus?: SubscriptionStatus;
 }
+
+// Stripe subscription status
+export type SubscriptionStatus = 
+  | 'active'
+  | 'trialing'
+  | 'past_due'
+  | 'canceled'
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'unpaid';
 
 // Habit types
 export type HabitCategory = 'health' | 'productivity' | 'learning' | 'wellness' | 'custom';
