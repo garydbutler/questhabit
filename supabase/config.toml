@@ -22,7 +22,7 @@ port = 54322
 shadow_port = 54320
 # The database major version to use. This has to be the same as your remote database's. Run `SHOW
 # server_version;` on the remote database to check.
-major_version = 15
+major_version = 17
 
 [studio]
 enabled = true
@@ -74,6 +74,20 @@ double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
 enable_confirmations = false
 
-[functions]
-# Set to false to disable Supabase Functions
-enabled = true
+[functions.waitlist-signup]
+verify_jwt = false
+
+[functions.waitlist-export]
+verify_jwt = true
+
+[functions.ai-coach]
+verify_jwt = true
+
+[functions.create-checkout-session]
+verify_jwt = true
+
+[functions.customer-portal]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
