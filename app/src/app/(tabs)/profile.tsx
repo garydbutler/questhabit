@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../../stores/authStore';
+import { useAchievementStore } from '../../stores/achievementStore';
 import { LevelBadge } from '../../components/gamification/LevelBadge';
+import { AchievementBadge } from '../../components/gamification/AchievementBadge';
 import { Card } from '../../components/ui/Card';
 import { GradientCard } from '../../components/ui/GradientCard';
 import { IconBadge } from '../../components/ui/IconBadge';
@@ -22,6 +24,13 @@ import { Colors, Typography, Spacing, Radius, Shadows, Icons } from '../../const
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuthStore();
+  const { achievements, fetchAchievements } = useAchievementStore();
+
+  useEffect(() => {
+    if (user) {
+      fetchAchievements();
+    }
+  }, [user]);
 
   const handleSignOut = () => {
     Alert.alert(
@@ -101,6 +110,47 @@ export default function ProfileScreen() {
       {/* Level Card */}
       <View style={styles.section}>
         <LevelBadge totalXP={user.totalXp} />
+      </View>
+
+      {/* Achievements Section */}
+      <View style={styles.section}>
+        <SectionHeader
+          title="Achievements"
+          actionLabel="View All"
+          onAction={() => router.push('/achievements')}
+        />
+        {achievements.length > 0 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.achievementScroll}
+          >
+            {achievements.slice(0, 4).map(a => (
+              <TouchableOpacity
+                key={a.id}
+                activeOpacity={0.7}
+                onPress={() => router.push('/achievements')}
+              >
+                <AchievementBadge
+                  type={a.achievementType}
+                  unlockedAt={a.unlockedAt}
+                  compact
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        ) : (
+          <TouchableOpacity
+            style={styles.achievementEmpty}
+            onPress={() => router.push('/achievements')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.achievementEmptyIcon}>{Icons.trophy}</Text>
+            <Text style={styles.achievementEmptyText}>
+              Complete habits to earn badges!
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Pro Banner - Show if NOT Pro */}
@@ -439,6 +489,29 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 20,
     color: Colors.text.muted,
+  },
+
+  // Achievements
+  achievementScroll: {
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xxs,
+  },
+  achievementEmpty: {
+    backgroundColor: Colors.bg.elevated,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  achievementEmptyIcon: {
+    fontSize: 22,
+    color: Colors.text.muted,
+  },
+  achievementEmptyText: {
+    ...Typography.caption,
+    color: Colors.text.tertiary,
   },
 
   version: {
