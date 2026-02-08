@@ -1,4 +1,4 @@
-// Waitlist Signup Edge Function
+﻿// Waitlist Signup Edge Function
 // Handles email signups from the landing page with validation and rate limiting
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';

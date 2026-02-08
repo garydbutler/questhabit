@@ -1,4 +1,4 @@
-// Waitlist Export Edge Function (Admin Only)
+﻿// Waitlist Export Edge Function (Admin Only)
 // Exports waitlist data as CSV for marketing purposes
 // Protected by ADMIN_SECRET environment variable
 
