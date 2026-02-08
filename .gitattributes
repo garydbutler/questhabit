@@ -1,0 +1,5 @@
+# Supabase Edge Functions must use LF line endings (Deno requirement)
+supabase/functions/**/*.ts text eol=lf
+
+# Config files
+supabase/config.toml text eol=lf
