@@ -9,11 +9,15 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../stores/authStore';
 import { useHabitStore } from '../../stores/habitStore';
 import { IconBadge } from '../ui/IconBadge';
+import { GradientButton } from '../ui/GradientButton';
 import { Colors, Typography, Spacing, Radius, Icons } from '../../constants/design';
+import { supabase } from '../../lib/supabase';
 
 interface Message {
   id: string;
@@ -34,11 +38,11 @@ const QUICK_PROMPTS = [
   { symbol: '\u2726', text: 'Suggest a new habit', color: Colors.semantic.success },
 ];
 
-const SYSTEM_PROMPT = `You are QuestHabit's AI Coach — a supportive, gamification-savvy habit coach.`;
-
 export function AICoach({ visible, onClose }: AICoachProps) {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { habits } = useHabitStore();
+  const isPro = user?.isPro ?? false;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,8 +68,13 @@ export function AICoach({ visible, onClose }: AICoachProps) {
     const totalXP = user?.totalXp || 0;
     const level = user?.level || 1;
 
+    // Show upgrade prompt for non-Pro users
+    if (!isPro) {
+      return "Hey there, hero! I'm your AI Coach. I can provide personalized guidance, analyze your habits, and help you level up faster.\n\nUpgrade to Pro to unlock real-time AI coaching powered by GPT-4. I'll remember our conversations and give you advice tailored to YOUR journey.";
+    }
+
     if (activeHabits.length === 0) {
-      return "Hey there, hero! I'm your AI Coach. Looks like you haven't created any habits yet — that's totally fine! Everyone starts somewhere. Want me to suggest some beginner-friendly habits to kick off your journey?";
+      return "Hey there, hero! I'm your AI Coach, powered by real AI. Looks like you haven't created any habits yet — that's totally fine! Everyone starts somewhere. Want me to suggest some beginner-friendly habits to kick off your journey?";
     }
 
     const bestStreak = Math.max(...activeHabits.map(h => h.streak?.currentStreak || 0));
@@ -114,25 +123,68 @@ export function AICoach({ visible, onClose }: AICoachProps) {
     setIsLoading(true);
 
     try {
+      // Check Pro status before making API call
+      if (!isPro) {
+        const upgradeMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: "To get personalized AI responses, you'll need to upgrade to Pro. With Pro, I can analyze your specific habits, remember our conversations, and give you tailored advice based on your actual progress.\n\nWant to see what Pro unlocks?",
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, upgradeMessage]);
+        return;
+      }
+
       const context = buildContext();
-      const response = await generateCoachResponse(text.trim(), context, messages);
-      
+      const historyForApi = messages
+        .filter(m => m.id !== 'welcome')
+        .map(m => ({ role: m.role, content: m.content }));
+
+      // Call the real AI coach edge function
+      const { data, error } = await supabase.functions.invoke('ai-coach', {
+        body: {
+          message: text.trim(),
+          userId: user?.id,
+          context,
+          history: historyForApi,
+        },
+      });
+
+      if (error) {
+        console.error('AI Coach API error:', error);
+        throw new Error(error.message || 'Failed to get AI response');
+      }
+
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: response,
+        content: data.response || "Hmm, I had trouble processing that. Try again?",
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: "Oops! I hit a snag. Try again in a moment — even heroes face temporary setbacks!",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+    } catch (error: any) {
+      console.error('AI Coach error:', error);
+      
+      // Check if it's a subscription error
+      if (error.message?.includes('Pro subscription required')) {
+        const upgradeMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: "Looks like your Pro subscription needs attention. Check your subscription settings to keep the AI coaching flowing!",
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, upgradeMessage]);
+      } else {
+        // Generic error fallback
+        const errorMessage: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: "Oops! I hit a snag. Try again in a moment — even heroes face temporary setbacks!",
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +196,10 @@ export function AICoach({ visible, onClose }: AICoachProps) {
 
   const handleQuickPrompt = (prompt: string) => {
     sendMessage(prompt);
+  };
+
+  const handleUpgrade = () => {
+    router.push('/pro');
   };
 
   if (!visible) return null;
@@ -161,10 +217,21 @@ export function AICoach({ visible, onClose }: AICoachProps) {
           <View>
             <Text style={styles.coachName}>AI Coach</Text>
             <View style={styles.statusRow}>
-              <View style={[styles.statusDot, { backgroundColor: isLoading ? Colors.xp.primary : Colors.semantic.success }]} />
-              <Text style={styles.coachStatus}>
-                {isLoading ? 'Thinking...' : 'Online'}
-              </Text>
+              {isPro ? (
+                <>
+                  <View style={[styles.statusDot, { backgroundColor: isLoading ? Colors.xp.primary : Colors.semantic.success }]} />
+                  <Text style={styles.coachStatus}>
+                    {isLoading ? 'Thinking...' : 'GPT-4 Powered'}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <View style={[styles.statusDot, { backgroundColor: Colors.semantic.warning }]} />
+                  <Text style={[styles.coachStatus, { color: Colors.semantic.warning }]}>
+                    Pro Required
+                  </Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -172,6 +239,24 @@ export function AICoach({ visible, onClose }: AICoachProps) {
           <Text style={styles.closeText}>{Icons.close}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Pro Upsell Banner (for non-Pro users) */}
+      {!isPro && (
+        <View style={styles.upsellBanner}>
+          <View style={styles.upsellContent}>
+            <Text style={styles.upsellTitle}>Unlock Real AI Coaching</Text>
+            <Text style={styles.upsellText}>
+              Get personalized advice powered by GPT-4. Analyze your habits, get motivation tips, and level up faster.
+            </Text>
+          </View>
+          <GradientButton
+            title="Go Pro"
+            onPress={handleUpgrade}
+            size="sm"
+            style={styles.upsellButton}
+          />
+        </View>
+      )}
 
       {/* Messages */}
       <ScrollView
@@ -201,7 +286,10 @@ export function AICoach({ visible, onClose }: AICoachProps) {
 
         {isLoading && (
           <View style={[styles.messageBubble, styles.assistantBubble]}>
-            <ActivityIndicator size="small" color={Colors.accent.primary} />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={Colors.accent.primary} />
+              <Text style={styles.loadingText}>Analyzing your journey...</Text>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -234,7 +322,7 @@ export function AICoach({ visible, onClose }: AICoachProps) {
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="Ask your coach..."
+          placeholder={isPro ? "Ask your coach..." : "Upgrade to Pro to chat..."}
           placeholderTextColor={Colors.text.muted}
           multiline
           maxLength={500}
@@ -242,7 +330,7 @@ export function AICoach({ visible, onClose }: AICoachProps) {
           blurOnSubmit
         />
         <TouchableOpacity
-          style={[styles.sendButton, !input.trim() && styles.sendButtonDisabled]}
+          style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
           onPress={() => sendMessage(input)}
           disabled={!input.trim() || isLoading}
         >
@@ -251,82 +339,6 @@ export function AICoach({ visible, onClose }: AICoachProps) {
       </View>
     </KeyboardAvoidingView>
   );
-}
-
-// Local response generator (swap for API call in production)
-async function generateCoachResponse(
-  userMessage: string,
-  context: any,
-  history: Message[]
-): Promise<string> {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  const msg = userMessage.toLowerCase();
-  const { habits, completedToday, habitCount, level, totalXP } = context;
-  const activeStreaks = habits.filter((h: any) => h.streak > 0);
-  const bestStreak = habits.reduce((max: number, h: any) => Math.max(max, h.streak), 0);
-
-  if (msg.includes('progress') || msg.includes('analyze') || msg.includes('how am i doing')) {
-    if (habitCount === 0) {
-      return "You haven't started any quests yet! That's like standing at the entrance of the dungeon — exciting things are ahead. Start with ONE habit. Just one. Make it easy, make it daily. That's your first quest.";
-    }
-    const completionRate = habitCount > 0 ? Math.round((completedToday / habitCount) * 100) : 0;
-    return `Progress Report:\n\n` +
-      `Level ${level} | ${totalXP} XP earned\n` +
-      `${habitCount} active habits | ${completedToday} done today (${completionRate}%)\n` +
-      `Best active streak: ${bestStreak} days\n\n` +
-      (completionRate === 100 ? "You're crushing it today! Perfect completion rate. That's legendary status." :
-       completionRate >= 50 ? "Solid progress! You're past the halfway point today. Every habit completed is XP earned. Push for that perfect day!" :
-       "Still some quests left to complete today. Remember: showing up is half the battle. Even completing one more habit keeps the momentum going.");
-  }
-
-  if (msg.includes('motivat') || msg.includes('struggling') || msg.includes('hard') || msg.includes('give up')) {
-    if (bestStreak > 0) {
-      return `I hear you — every hero faces tough days. But look at what you've already built: a ${bestStreak}-day streak! That's not luck, that's character.\n\nHere's what I want you to do: pick your EASIEST habit right now. Just one. Complete it. That small win triggers a cascade. You didn't come this far to only come this far.\n\nRemember: Level ${level} heroes don't quit. They adapt.`;
-    }
-    return "Hey, feeling stuck is part of the journey — it's the boss battle before the level-up. Here's the secret: you don't need motivation. You need a system so easy you can't say no.\n\nTry the 2-minute rule: make your habit so small it takes less than 2 minutes. Want to exercise? Put on your shoes. Want to read? Open the book. That's it. The rest follows.\n\nYou've got this. I believe in you.";
-  }
-
-  if (msg.includes('suggest') || msg.includes('new habit') || msg.includes('recommend') || msg.includes('what should')) {
-    const existingCategories = new Set(habits.map((h: any) => h.category));
-    const suggestions = [];
-    
-    if (!existingCategories.has('health')) {
-      suggestions.push("Drink Water (Easy) — Start with 8 glasses a day. Your body is a temple... that runs on water.");
-    }
-    if (!existingCategories.has('learning')) {
-      suggestions.push("Read 10 Pages (Medium) — Knowledge is the ultimate power-up. 10 pages a day = 12 books a year.");
-    }
-    if (!existingCategories.has('wellness')) {
-      suggestions.push("5-Min Meditation (Easy) — Mental armor. Even 5 minutes of stillness makes you sharper.");
-    }
-    if (!existingCategories.has('productivity')) {
-      suggestions.push("Plan Tomorrow Tonight (Easy) — 5 minutes of planning saves 60 minutes of chaos.");
-    }
-    
-    if (suggestions.length === 0) {
-      suggestions.push(
-        "Walk 10 Minutes — Low barrier, huge compound effect",
-        "Journal 3 Things — Gratitude or reflection, your call",
-        "Tidy 5 Minutes — Clean space = clear mind"
-      );
-    }
-
-    return `Here are some quests I'd recommend for your journey:\n\n${suggestions.slice(0, 3).join('\n\n')}\n\nStart with one that excites you. Remember: easy wins build momentum! Which one speaks to you?`;
-  }
-
-  if (msg.includes('streak') || msg.includes('consistent')) {
-    if (activeStreaks.length === 0) {
-      return "No active streaks yet — and that's totally okay! A streak starts with Day 1, and Day 1 starts with doing the thing RIGHT NOW.\n\nPro tip: Set a specific time for your habits. \"I'll meditate after my morning coffee\" works way better than \"I'll meditate sometime today.\" Tie new habits to existing routines.";
-    }
-    const topStreak = habits.reduce((best: any, h: any) => h.streak > (best?.streak || 0) ? h : best, null);
-    return `Streak Report:\n\n${activeStreaks.map((h: any) => `${h.name}: ${h.streak} days (best: ${h.bestStreak})`).join('\n')}\n\n${topStreak ? `Your strongest quest is "${topStreak.name}" — protect that streak!` : ''}\n\nTip: Complete your highest-streak habit FIRST each day. That way, even on bad days, you protect what matters most.`;
-  }
-
-  return `Great question! As your Level ${level} coach, here's my take:\n\n` +
-    `You're doing well with ${habitCount} active habits and ${totalXP} XP. The key to sustainable growth is consistency over intensity.\n\n` +
-    `Focus on showing up every day, even if it's a "minimum viable effort" day. A 1-minute meditation still counts. A single pushup still counts. What matters is keeping the chain unbroken.\n\n` +
-    `What specific aspect of your habit journey would you like to explore?`;
 }
 
 const styles = StyleSheet.create({
@@ -381,6 +393,33 @@ const styles = StyleSheet.create({
     color: Colors.text.tertiary,
     fontSize: 16,
   },
+  upsellBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.bg.elevated,
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.accent.primary + '40',
+  },
+  upsellContent: {
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
+  upsellTitle: {
+    ...Typography.bodyBold,
+    color: Colors.accent.primary,
+    marginBottom: 2,
+  },
+  upsellText: {
+    ...Typography.caption,
+    color: Colors.text.tertiary,
+  },
+  upsellButton: {
+    minWidth: 80,
+  },
   messages: {
     flex: 1,
   },
@@ -415,6 +454,16 @@ const styles = StyleSheet.create({
   },
   assistantText: {
     color: Colors.text.secondary,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  loadingText: {
+    ...Typography.caption,
+    color: Colors.text.tertiary,
+    fontStyle: 'italic',
   },
   quickPrompts: {
     maxHeight: 56,
