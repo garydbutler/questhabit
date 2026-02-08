@@ -12,10 +12,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 import { useHabitStore } from '../../stores/habitStore';
+import { useQuestStore } from '../../stores/questStore';
 import { HabitCard } from '../../components/habits/HabitCard';
 import { DailyProgress } from '../../components/habits/DailyProgress';
 import { LevelBadge } from '../../components/gamification/LevelBadge';
 import { XPPopup } from '../../components/gamification/XPPopup';
+import { QuestSection } from '../../components/quests/QuestSection';
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { GradientButton } from '../../components/ui/GradientButton';
 import { Colors, Typography, Spacing, Radius, Shadows, Icons } from '../../constants/design';
@@ -24,6 +26,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { habits, fetchHabits, completeHabit, getTodayHabits, isLoading } = useHabitStore();
+  const { activeQuests, refreshQuests, claimQuestReward, checkAndProgressQuests } = useQuestStore();
   const [refreshing, setRefreshing] = useState(false);
   const [xpPopup, setXpPopup] = useState<{ show: boolean; xp: number }>({
     show: false,
@@ -36,22 +39,45 @@ export default function HomeScreen() {
   useEffect(() => {
     if (user) {
       fetchHabits();
+      refreshQuests();
     }
   }, [user]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchHabits();
+    await refreshQuests();
     setRefreshing(false);
   };
 
   const handleCompleteHabit = async (habitId: string) => {
+    const habit = todayHabits.find(h => h.id === habitId);
     const result = await completeHabit(habitId);
     if (result.success && result.xpEarned) {
       setXpPopup({ show: true, xp: result.xpEarned });
       if (result.leveledUp) {
         console.log('Level up!', result.newLevel);
       }
+
+      // Progress quests based on this completion
+      const newCompletedCount = todayHabits.filter(h => h.completedToday || h.id === habitId).length;
+      await checkAndProgressQuests({
+        type: 'habit_completed',
+        habitCategory: habit?.category,
+        habitDifficulty: habit?.difficulty,
+        completionHour: new Date().getHours(),
+        totalCompletedToday: newCompletedCount,
+        totalDueToday: todayHabits.length,
+        currentStreak: habit?.streak ? habit.streak.currentStreak + 1 : 1,
+        xpEarned: result.xpEarned,
+      });
+    }
+  };
+
+  const handleClaimQuest = async (questId: string) => {
+    const result = await claimQuestReward(questId);
+    if (result.success && result.xpEarned) {
+      setXpPopup({ show: true, xp: result.xpEarned });
     }
   };
 
@@ -155,17 +181,28 @@ export default function HomeScreen() {
                   onPress={() => router.push(`/habit/${habit.id}`)}
                   onComplete={() => handleCompleteHabit(habit.id)}
                 />
-                {xpPopup.show && (
-                  <XPPopup
-                    xp={xpPopup.xp}
-                    onComplete={() => setXpPopup({ show: false, xp: 0 })}
-                  />
-                )}
               </View>
             ))
           )}
         </View>
+
+        {/* Quest Challenges Section */}
+        <View style={styles.section}>
+          <QuestSection
+            quests={activeQuests}
+            onClaim={handleClaimQuest}
+            isPro={user?.isPro}
+          />
+        </View>
       </ScrollView>
+
+      {/* XP Popup (positioned globally) */}
+      {xpPopup.show && (
+        <XPPopup
+          xp={xpPopup.xp}
+          onComplete={() => setXpPopup({ show: false, xp: 0 })}
+        />
+      )}
 
       {/* FAB */}
       {todayHabits.length > 0 && (

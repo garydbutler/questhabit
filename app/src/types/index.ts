@@ -91,6 +91,75 @@ export interface HabitWithStreak extends Habit {
   completedToday?: boolean;
 }
 
+// Quest/Challenge types
+export type QuestTier = 'daily' | 'weekly' | 'legendary';
+export type QuestStatus = 'active' | 'completed' | 'expired' | 'claimed';
+
+export type QuestRequirementType =
+  | 'complete_any'          // Complete X habits total
+  | 'complete_category'     // Complete X habits in a specific category
+  | 'complete_before_time'  // Complete X habits before a given hour
+  | 'complete_after_time'   // Complete X habits after a given hour
+  | 'perfect_day'           // 100% completion for the day
+  | 'streak_reach'          // Reach X streak on any habit
+  | 'xp_earn'               // Earn X total XP
+  | 'complete_difficulty'   // Complete X habits of a specific difficulty
+  | 'consecutive_days';     // Complete at least 1 habit for X consecutive days
+
+export interface QuestRequirement {
+  type: QuestRequirementType;
+  target: number;            // Target count to achieve
+  category?: HabitCategory;  // For category-specific quests
+  difficulty?: HabitDifficulty; // For difficulty-specific quests
+  hour?: number;             // For time-based quests
+}
+
+export interface QuestReward {
+  xp: number;
+  streakFreezes?: number;
+  badge?: string;
+}
+
+export interface QuestTemplate {
+  id: string;
+  name: string;
+  description: string;
+  tier: QuestTier;
+  requirement: QuestRequirement;
+  reward: QuestReward;
+  icon: string;
+  color: string;
+}
+
+export interface ActiveQuest {
+  id: string;
+  userId: string;
+  templateId: string;
+  tier: QuestTier;
+  name: string;
+  description: string;
+  requirement: QuestRequirement;
+  reward: QuestReward;
+  icon: string;
+  color: string;
+  progress: number;
+  status: QuestStatus;
+  activatedAt: string;
+  expiresAt: string;
+  completedAt?: string;
+  claimedAt?: string;
+}
+
+export interface QuestCompletion {
+  id: string;
+  userId: string;
+  questTemplateId: string;
+  questName: string;
+  tier: QuestTier;
+  xpEarned: number;
+  completedAt: string;
+}
+
 // Form types
 export interface CreateHabitInput {
   name: string;

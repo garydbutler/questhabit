@@ -102,6 +102,13 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="quests"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
           name="pro"
           options={{
             title: 'QuestHabit Pro',
