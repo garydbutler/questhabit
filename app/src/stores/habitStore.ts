@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { calculateXP, checkLevelUp } from '../lib/xp';
 import { useAuthStore } from './authStore';
 import { format, isToday, parseISO, startOfDay } from 'date-fns';
+import { WidgetService, WidgetData } from '../widgets';
 
 // Lazy import to avoid circular dependency
 const getAchievementStore = () => require('./achievementStore').useAchievementStore;
@@ -23,6 +24,7 @@ interface HabitState {
   completeHabit: (habitId: string) => Promise<{ success: boolean; xpEarned?: number; leveledUp?: boolean; newLevel?: number; error?: string }>;
   uncompleteHabit: (habitId: string) => Promise<{ success: boolean; error?: string }>;
   getTodayHabits: () => HabitWithStreak[];
+  updateWidgets: (recentXPGain?: number) => void;
   clearError: () => void;
 }
 
@@ -101,6 +103,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       }));
       
       set({ habits: habitsWithStreaks, isLoading: false });
+      
+      // Update iOS Home Screen Widgets on app launch/refresh
+      setTimeout(() => {
+        try {
+          get().updateWidgets();
+        } catch (widgetError) {
+          console.error('Widget update error:', widgetError);
+        }
+      }, 100);
     } catch (error: any) {
       console.error('Fetch habits error:', error);
       set({ error: error.message, isLoading: false });
@@ -340,6 +351,14 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         console.error('Achievement check error:', achievementError);
       }
       
+      // Update iOS Home Screen Widgets
+      try {
+        get().updateWidgets(totalXp);
+      } catch (widgetError) {
+        // Non-blocking — don't fail the completion
+        console.error('Widget update error:', widgetError);
+      }
+      
       return { success: true, xpEarned: totalXp, leveledUp, newLevel };
     } catch (error: any) {
       console.error('Complete habit error:', error);
@@ -385,6 +404,13 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       // Refresh habits
       await get().fetchHabits();
       
+      // Update iOS Home Screen Widgets
+      try {
+        get().updateWidgets();
+      } catch (widgetError) {
+        console.error('Widget update error:', widgetError);
+      }
+      
       return { success: true };
     } catch (error: any) {
       console.error('Uncomplete habit error:', error);
@@ -413,6 +439,60 @@ export const useHabitStore = create<HabitState>((set, get) => ({
           return true;
       }
     });
+  },
+  
+  updateWidgets: (recentXPGain?: number) => {
+    const { habits } = get();
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+    
+    // Get today's habits
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    
+    const todayHabits = habits.filter(habit => {
+      const { type, days } = habit.frequency;
+      switch (type) {
+        case 'daily': return true;
+        case 'weekdays': return dayOfWeek >= 1 && dayOfWeek <= 5;
+        case 'weekends': return dayOfWeek === 0 || dayOfWeek === 6;
+        case 'custom': return days?.includes(dayOfWeek) || false;
+        default: return true;
+      }
+    });
+    
+    const completedToday = todayHabits.filter(h => h.completedToday).length;
+    const totalToday = todayHabits.length;
+    
+    // Find best streak among all habits
+    let bestCurrentStreak = 0;
+    let bestOverallStreak = 0;
+    let streakHabitName: string | undefined;
+    
+    habits.forEach(habit => {
+      const currentStreak = habit.streak?.currentStreak || 0;
+      const bestStreak = habit.streak?.bestStreak || 0;
+      
+      if (currentStreak > bestCurrentStreak) {
+        bestCurrentStreak = currentStreak;
+        streakHabitName = habit.name;
+      }
+      if (bestStreak > bestOverallStreak) {
+        bestOverallStreak = bestStreak;
+      }
+    });
+    
+    const widgetData: WidgetData = {
+      completedToday,
+      totalToday,
+      currentStreak: bestCurrentStreak,
+      bestStreak: bestOverallStreak,
+      streakHabitName,
+      totalXP: user.totalXp,
+      recentXPGain,
+    };
+    
+    WidgetService.updateAllWidgets(widgetData);
   },
   
   clearError: () => set({ error: null }),
