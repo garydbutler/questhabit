@@ -42,7 +42,7 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
           </p>
 
           {/* Stats row */}
-          <div className="flex gap-8 mb-8">
+          <div className="flex gap-8 mb-12">
             {[
               { value: "50+", label: "Habit Templates" },
               { value: "AI", label: "Personal Coach" },
@@ -78,18 +78,18 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                 </span>
               </div>
             ) : (
-              <form onSubmit={onSubmit} className="flex gap-3 max-w-md">
+              <form onSubmit={onSubmit} className="flex gap-4 max-w-md">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="flex-1 px-6 py-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent-purple)] transition-colors"
+                  className="flex-1 px-6 py-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent-purple)] transition-colors text-base"
                 />
                 <button
                   type="submit"
-                  className="cta-button px-8 py-4 rounded-xl text-white font-semibold whitespace-nowrap"
+                  className="cta-button px-10 py-5 rounded-xl text-white font-semibold whitespace-nowrap text-base"
                 >
                   Join Waitlist
                 </button>

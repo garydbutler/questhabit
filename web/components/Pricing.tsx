@@ -136,7 +136,7 @@ export function Pricing() {
 
               <a
                 href="#waitlist"
-                className={`block w-full py-4 rounded-xl text-center font-semibold text-white transition-all ${plan.ctaStyle}`}
+                className={`block w-full py-5 rounded-xl text-center font-semibold text-white transition-all text-base ${plan.ctaStyle}`}
               >
                 {plan.cta}
               </a>
