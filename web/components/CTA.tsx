@@ -49,7 +49,7 @@ export function CTA({ email, setEmail, submitted, onSubmit }: CTAProps) {
             ) : (
               <form
                 onSubmit={onSubmit}
-                className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+                className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
               >
                 <input
                   type="email"
@@ -57,11 +57,11 @@ export function CTA({ email, setEmail, submitted, onSubmit }: CTAProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="flex-1 px-6 py-5 rounded-xl bg-[var(--color-bg-primary)] border border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent-purple)] transition-colors text-base"
+                  className="flex-1 px-6 py-4 rounded-xl bg-[var(--color-bg-secondary)] border-2 border-[var(--color-text-muted)]/30 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent-purple)] transition-colors text-base"
                 />
                 <button
                   type="submit"
-                  className="cta-button px-10 py-5 rounded-xl text-white font-semibold whitespace-nowrap text-base"
+                  className="cta-button px-8 py-4 rounded-xl text-white font-semibold whitespace-nowrap text-base"
                 >
                   Join the Quest
                 </button>
