@@ -85,7 +85,7 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="flex-1 px-6 py-4 rounded-xl bg-[var(--color-bg-secondary)] border-2 border-[var(--color-text-muted)]/30 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent-purple)] transition-colors text-base"
+                  className="flex-1 px-6 py-4 rounded-xl bg-[#1a1a2e] border-2 border-[#4a4a6a] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent-purple)] transition-colors text-base"
                 />
                 <button
                   type="submit"
