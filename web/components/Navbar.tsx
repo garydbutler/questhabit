@@ -52,7 +52,7 @@ export function Navbar() {
             ))}
             <a
               href="#waitlist"
-              className="cta-button px-5 py-2 rounded-full text-white text-sm font-semibold"
+              className="cta-button px-6 py-2.5 rounded-full text-white text-sm font-semibold"
             >
               Join Waitlist
             </a>
@@ -97,7 +97,7 @@ export function Navbar() {
             <a
               href="#waitlist"
               onClick={() => setMobileOpen(false)}
-              className="block mt-2 cta-button text-center px-5 py-3 rounded-full text-white font-semibold"
+              className="block mt-2 cta-button text-center px-6 py-3.5 rounded-full text-white font-semibold"
             >
               Join Waitlist
             </a>

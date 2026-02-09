@@ -58,7 +58,7 @@ export function FAQ() {
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between p-5 text-left"
+                className="w-full flex items-center justify-between px-6 py-5 text-left"
               >
                 <span className="font-semibold text-sm pr-4">{faq.q}</span>
                 <svg
@@ -76,7 +76,7 @@ export function FAQ() {
                 </svg>
               </button>
               {openIndex === i && (
-                <div className="px-5 pb-5">
+                <div className="px-6 pb-6">
                   <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
                     {faq.a}
                   </p>
