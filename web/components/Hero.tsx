@@ -42,7 +42,7 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
           </p>
 
           {/* Stats row */}
-          <div className="flex gap-8 mb-12">
+          <div className="flex gap-8 mb-6">
             {[
               { value: "50+", label: "Habit Templates" },
               { value: "AI", label: "Personal Coach" },
@@ -78,7 +78,7 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                 </span>
               </div>
             ) : (
-              <form onSubmit={onSubmit} className="flex gap-4 max-w-lg">
+              <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg">
                 <input
                   type="email"
                   value={email}
@@ -89,7 +89,7 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                 />
                 <button
                   type="submit"
-                  className="cta-button px-8 py-4 rounded-xl text-white font-semibold whitespace-nowrap text-base"
+                  className="cta-button px-8 py-4 rounded-xl text-white font-semibold whitespace-nowrap text-base min-w-[160px]"
                 >
                   Join Waitlist
                 </button>
@@ -106,27 +106,27 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
 
             <div className="phone-mockup animate-float relative z-10">
               {/* Screen content */}
-              <div className="p-5 pt-10 h-full">
+              <div className="px-4 pt-14 pb-4 h-full overflow-hidden">
                 {/* Status bar */}
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs text-[var(--color-text-muted)]">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-[11px] text-[var(--color-text-muted)]">
                     9:41
                   </span>
                   <div className="flex gap-1">
-                    <div className="w-4 h-2 rounded-sm bg-[var(--color-text-muted)]" />
-                    <div className="w-4 h-2 rounded-sm bg-[var(--color-text-muted)]" />
-                    <div className="w-6 h-2 rounded-sm bg-[var(--color-accent-green)]" />
+                    <div className="w-3.5 h-1.5 rounded-sm bg-[var(--color-text-muted)]" />
+                    <div className="w-3.5 h-1.5 rounded-sm bg-[var(--color-text-muted)]" />
+                    <div className="w-5 h-1.5 rounded-sm bg-[var(--color-accent-green)]" />
                   </div>
                 </div>
 
                 {/* Greeting */}
-                <h3 className="text-lg font-bold mb-1">Good morning! &#x1F525;</h3>
-                <p className="text-xs text-[var(--color-text-muted)] mb-4">
-                  Level 12 - 2,450 XP
+                <h3 className="text-base font-bold mb-0.5">Good morning! &#x1F525;</h3>
+                <p className="text-[11px] text-[var(--color-text-muted)] mb-3">
+                  Level 12 &middot; 2,450 XP
                 </p>
 
                 {/* XP Progress bar */}
-                <div className="w-full h-2 rounded-full bg-[var(--color-bg-primary)] mb-5">
+                <div className="w-full h-1.5 rounded-full bg-[var(--color-bg-primary)] mb-4">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-[var(--color-accent-purple)] to-[var(--color-accent-blue)]"
                     style={{ width: "72%" }}
@@ -134,10 +134,10 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                 </div>
 
                 {/* Streak card */}
-                <div className="glass rounded-xl p-3 mb-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold">Current Streak</span>
-                    <span className="text-lg font-bold gradient-text">
+                <div className="glass rounded-xl p-2.5 mb-3">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-[11px] font-semibold">Current Streak</span>
+                    <span className="text-sm font-bold gradient-text">
                       21 days
                     </span>
                   </div>
@@ -145,7 +145,7 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                     {Array.from({ length: 7 }).map((_, i) => (
                       <div
                         key={i}
-                        className={`flex-1 h-6 rounded-md ${
+                        className={`flex-1 h-5 rounded-md ${
                           i < 5
                             ? "bg-[var(--color-accent-purple)]"
                             : i === 5
@@ -186,10 +186,10 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                 ].map((habit) => (
                   <div
                     key={habit.name}
-                    className="flex items-center gap-3 py-2.5 border-b border-[var(--color-border)]"
+                    className="flex items-center gap-2 py-2 border-b border-[var(--color-border)]"
                   >
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                         habit.done
                           ? "bg-[var(--color-accent-green)] border-[var(--color-accent-green)]"
                           : "border-[var(--color-border)]"
@@ -197,8 +197,8 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                     >
                       {habit.done && (
                         <svg
-                          width="12"
-                          height="12"
+                          width="10"
+                          height="10"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="white"
@@ -209,12 +209,12 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                       )}
                     </div>
                     <span
-                      className="text-lg"
+                      className="text-sm"
                       dangerouslySetInnerHTML={{ __html: habit.icon }}
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div
-                        className={`text-xs font-medium ${
+                        className={`text-[11px] font-medium truncate ${
                           habit.done
                             ? "line-through text-[var(--color-text-muted)]"
                             : ""
@@ -223,15 +223,15 @@ export function Hero({ email, setEmail, submitted, onSubmit }: HeroProps) {
                         {habit.name}
                       </div>
                     </div>
-                    <span className="text-[10px] text-[var(--color-accent-purple-light)]">
+                    <span className="text-[10px] text-[var(--color-accent-purple-light)] shrink-0">
                       {habit.xp}
                     </span>
                   </div>
                 ))}
 
                 {/* Achievement toast */}
-                <div className="mt-4 glass rounded-xl p-3 border-[var(--color-accent-orange)]/30 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--color-accent-orange)]/20 flex items-center justify-center text-sm">
+                <div className="mt-3 glass rounded-xl p-2.5 border-[var(--color-accent-orange)]/30 flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-[var(--color-accent-orange)]/20 flex items-center justify-center text-sm shrink-0">
                     &#x1F3C6;
                   </div>
                   <div>
