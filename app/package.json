@@ -1,6 +1,6 @@
 {
   "name": "questhabit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -9,11 +9,13 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/ui": "^0.0.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@supabase/supabase-js": "^2.93.2",
-    "babel-preset-expo": "^54.0.10",
+    "babel-preset-expo": "^55.0.0",
     "date-fns": "^4.1.0",
-    "expo": "~54.0.32",
+    "expo": "~55.0.0",
+    "expo-widgets": "~0.0.1",
     "expo-constants": "^18.0.13",
     "expo-crypto": "^15.0.8",
     "expo-device": "~8.0.10",

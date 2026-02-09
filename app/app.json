@@ -44,6 +44,32 @@
           "defaultChannel": "habit-reminders",
           "sounds": []
         }
+      ],
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.questhabit.app",
+          "widgets": [
+            {
+              "name": "HabitProgressWidget",
+              "displayName": "Daily Progress",
+              "description": "Track your daily habit completion at a glance",
+              "supportedFamilies": ["systemSmall", "systemMedium"]
+            },
+            {
+              "name": "StreakWidget",
+              "displayName": "Streak Tracker",
+              "description": "Keep an eye on your habit streaks",
+              "supportedFamilies": ["systemSmall", "accessoryCircular"]
+            },
+            {
+              "name": "LevelWidget",
+              "displayName": "Level Progress",
+              "description": "See your XP and level progress",
+              "supportedFamilies": ["systemSmall", "systemMedium"]
+            }
+          ]
+        }
       ]
     ],
     "experiments": {
