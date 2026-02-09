@@ -80,7 +80,7 @@ serve(async (req) => {
     // Verify user exists and check Pro status
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('is_pro, subscription_status')
+      .select('is_pro, stripe_subscription_status')
       .eq('id', userId)
       .single();
 
@@ -90,9 +90,9 @@ serve(async (req) => {
 
     // Check if user has Pro access (AI Coach is a Pro feature)
     // Support both is_pro boolean and subscription_status string for compatibility
-    const isPro = profile.is_pro === true || 
-                  profile.subscription_status === 'active' || 
-                  profile.subscription_status === 'trialing';
+    const isPro = profile.is_pro === true ||
+                  profile.stripe_subscription_status === 'active' ||
+                  profile.stripe_subscription_status === 'trialing';
     
     if (!isPro) {
       return new Response(

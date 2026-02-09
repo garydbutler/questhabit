@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 import { useHabitStore } from '../../stores/habitStore';
@@ -24,6 +25,7 @@ import { Colors, Typography, Spacing, Radius, Shadows, Icons } from '../../const
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const { habits, fetchHabits, completeHabit, getTodayHabits, isLoading } = useHabitStore();
   const { activeQuests, refreshQuests, claimQuestReward, checkAndProgressQuests } = useQuestStore();
@@ -128,7 +130,7 @@ export default function HomeScreen() {
           colors={['#0B0F1A', '#111827', '#0F172A']}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.5, y: 1 }}
-          style={styles.heroGradient}
+          style={[styles.heroGradient, { paddingTop: insets.top + Spacing.md }]}
         >
           <View style={styles.header}>
             <View style={styles.headerLeft}>
@@ -245,7 +247,6 @@ const styles = StyleSheet.create({
   },
   heroGradient: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: 60,
     paddingBottom: Spacing.xl,
   },
   header: {
