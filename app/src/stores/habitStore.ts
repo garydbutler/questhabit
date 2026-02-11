@@ -4,9 +4,53 @@ import { supabase } from '../lib/supabase';
 import { calculateXP, checkLevelUp } from '../lib/xp';
 import { useAuthStore } from './authStore';
 import { format, isToday, parseISO, startOfDay } from 'date-fns';
+import { WidgetService } from '../widgets';
 
 // Lazy import to avoid circular dependency
 const getAchievementStore = () => require('./achievementStore').useAchievementStore;
+
+// Helper to collect widget data and update widgets
+const updateWidgets = async () => {
+  try {
+    const habits = useHabitStore.getState().habits;
+    const profile = useAuthStore.getState().user;
+
+    if (!habits.length) return;
+
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayHabits = habits.filter(h => !h.isArchived);
+    const completedToday = todayHabits.filter(h => h.completedToday).length;
+
+    // Find best streak across all habits
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let streakHabitName: string | undefined;
+
+    todayHabits.forEach(habit => {
+      const streak = habit.streak;
+      if (streak) {
+        if (streak.currentStreak > currentStreak) {
+          currentStreak = streak.currentStreak;
+          streakHabitName = habit.name;
+        }
+        if (streak.bestStreak > bestStreak) {
+          bestStreak = streak.bestStreak;
+        }
+      }
+    });
+
+    await WidgetService.updateAllWidgets({
+      completedToday,
+      totalToday: todayHabits.length,
+      currentStreak,
+      bestStreak,
+      streakHabitName,
+      totalXP: profile?.totalXp || 0,
+    });
+  } catch (error) {
+    console.error('[HabitStore] Widget update error:', error);
+  }
+};
 
 interface HabitState {
   habits: HabitWithStreak[];
@@ -371,6 +415,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         // Non-blocking — don't fail the completion
         console.error('Achievement check error:', achievementError);
       }
+
+      // Update home screen widgets
+      updateWidgets();
       
       return { success: true, xpEarned: totalXp, leveledUp, newLevel };
     } catch (error: any) {
@@ -418,6 +465,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       
       // Refresh habits
       await get().fetchHabits();
+
+      // Update home screen widgets
+      updateWidgets();
       
       return { success: true };
     } catch (error: any) {
