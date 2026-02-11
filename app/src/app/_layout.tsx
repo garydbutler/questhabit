@@ -1,12 +1,25 @@
 import { useEffect, useRef } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, AppState, AppStateStatus } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../stores/authStore';
+import { useHabitStore } from '../stores/habitStore';
 import { configureNotifications } from '../lib/notifications';
 import { Colors } from '../constants/design';
+import { WidgetService } from '../widgets';
+
+// Register Android widget task handler
+if (Platform.OS === 'android') {
+  try {
+    const { registerWidgetTaskHandler } = require('react-native-android-widget');
+    const { widgetTaskHandler } = require('../widgets/android');
+    registerWidgetTaskHandler(widgetTaskHandler);
+  } catch (e) {
+    console.log('[App] Android widget registration skipped:', e);
+  }
+}
 
 // Configure notification behavior on import (before component mounts)
 configureNotifications();
@@ -17,8 +30,57 @@ export default function RootLayout() {
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
 
+  // Update widgets when app comes to foreground
+  const updateWidgets = async () => {
+    const habits = useHabitStore.getState().habits;
+    const user = useAuthStore.getState().user;
+    
+    if (!habits.length) return;
+
+    const todayHabits = habits.filter(h => !h.isArchived);
+    const completedToday = todayHabits.filter(h => h.completedToday).length;
+
+    // Find best streak across all habits
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let streakHabitName: string | undefined;
+
+    todayHabits.forEach(habit => {
+      const streak = habit.streak;
+      if (streak) {
+        if (streak.currentStreak > currentStreak) {
+          currentStreak = streak.currentStreak;
+          streakHabitName = habit.name;
+        }
+        if (streak.bestStreak > bestStreak) {
+          bestStreak = streak.bestStreak;
+        }
+      }
+    });
+
+    await WidgetService.updateAllWidgets({
+      completedToday,
+      totalToday: todayHabits.length,
+      currentStreak,
+      bestStreak,
+      streakHabitName,
+      totalXP: user?.totalXp || 0,
+    });
+  };
+
   useEffect(() => {
     initialize();
+
+    // Update widgets on app launch
+    updateWidgets();
+
+    // Listen for app state changes to update widgets
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        updateWidgets();
+      }
+    };
+    const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
 
     // Listen for incoming notifications (foreground)
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -39,6 +101,7 @@ export default function RootLayout() {
     });
 
     return () => {
+      appStateSubscription.remove();
       notificationListener.current?.remove();
       responseListener.current?.remove();
     };

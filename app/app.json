@@ -44,6 +44,54 @@
           "defaultChannel": "habit-reminders",
           "sounds": []
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "HabitProgressWidget",
+              "label": "Daily Progress",
+              "description": "Track your daily habit completion at a glance",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "250dp",
+              "maxResizeHeight": "110dp",
+              "widgetFeatures": "reconfigurable",
+              "previewImage": "./assets/widgets/progress-preview.png",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "StreakWidget",
+              "label": "Streak Tracker",
+              "description": "Keep an eye on your habit streaks",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "previewImage": "./assets/widgets/streak-preview.png",
+              "resizeMode": "none",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "LevelWidget",
+              "label": "Level Progress",
+              "description": "See your XP and level progress",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "250dp",
+              "maxResizeHeight": "110dp",
+              "previewImage": "./assets/widgets/level-preview.png",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
       ]
     ],
     "experiments": {
